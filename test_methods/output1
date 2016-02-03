@@ -1,0 +1,235 @@
+
+Rewriting paths for your new installation directory
+===================================================
+
+This might take a few minutes but only has to be done once.
+
+patching /usr/lib/sagemath/src/build/cythonized/sage/structure/list_clone.c
+Using test \# 0 .........
+product_threshold =  3
+time to complete method1:		3.11748600006
+time to complete method2:		0.0133848190308
+time to complete method2a:		0.0131778717041
+time to complete method3:		0.170352935791
+time to complete method4:		0.0145900249481
+time to complete method5:		0.131652832031
+time to complete method6:		0.0478320121765
+time to complete method7:		0.137644052505
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  4
+time to complete method1:		0.0263540744781
+time to complete method2:		0.0287079811096
+time to complete method2a:		0.0287709236145
+time to complete method3:		0.361053943634
+time to complete method4:		0.0306408405304
+time to complete method5:		0.326906204224
+time to complete method6:		0.0719478130341
+time to complete method7:		0.27960395813
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  5
+time to complete method1:		0.058779001236
+time to complete method2:		0.0617837905884
+time to complete method2a:		0.0613729953766
+time to complete method3:		0.659955024719
+time to complete method4:		0.0648171901703
+time to complete method5:		0.635693073273
+time to complete method6:		0.111410140991
+time to complete method7:		0.559325933456
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  6
+time to complete method1:		0.128696918488
+time to complete method2:		0.128878831863
+time to complete method2a:		0.127840995789
+time to complete method3:		1.30144190788
+time to complete method4:		0.142774105072
+time to complete method5:		1.25951600075
+time to complete method6:		0.152645111084
+time to complete method7:		1.06071805954
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  7
+time to complete method1:		0.272336006165
+time to complete method2:		0.276006937027
+time to complete method2a:		0.277668952942
+time to complete method3:		2.58968806267
+time to complete method4:		0.29633808136
+time to complete method5:		2.52458000183
+time to complete method6:		0.238814115524
+time to complete method7:		2.14903616905
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  8
+time to complete method1:		0.598614931107
+time to complete method2:		0.586072921753
+time to complete method2a:		0.570318937302
+time to complete method3:		5.23403000832
+time to complete method4:		0.633589982986
+time to complete method5:		5.4473631382
+time to complete method6:		0.422778844833
+time to complete method7:		4.61538887024
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  9
+time to complete method1:		1.33900213242
+time to complete method2:		1.21105504036
+time to complete method2a:		1.23095488548
+time to complete method3:		10.9156467915
+time to complete method4:		1.36218905449
+time to complete method5:		10.1171681881
+time to complete method6:		0.920893907547
+time to complete method7:		8.39296412468
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  10
+time to complete method1:		3.22407197952
+time to complete method2:		2.55016112328
+time to complete method2a:		2.5693769455
+time to complete method3:		20.914839983
+time to complete method4:		2.96548700333
+time to complete method5:		21.1842429638
+time to complete method6:		1.6762638092
+time to complete method7:		18.4404449463
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+Using test \# 1 .........
+product_threshold =  3
+time to complete method1:		0.04319190979
+time to complete method2:		0.0468039512634
+time to complete method2a:		0.0517151355743
+time to complete method3:		0.490859985352
+time to complete method4:		0.0533018112183
+time to complete method5:		0.458353996277
+time to complete method6:		0.0966370105743
+time to complete method7:		0.423498868942
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  4
+time to complete method1:		0.17342710495
+time to complete method2:		0.141017913818
+time to complete method2a:		0.137786865234
+time to complete method3:		1.25540089607
+time to complete method4:		0.146939992905
+time to complete method5:		1.2149310112
+time to complete method6:		0.166378974915
+time to complete method7:		1.13169884682
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  5
+time to complete method1:		0.448318004608
+time to complete method2:		0.442468881607
+time to complete method2a:		0.434546947479
+time to complete method3:		3.59171390533
+time to complete method4:		0.49932718277
+time to complete method5:		3.90023112297
+time to complete method6:		0.392731904984
+time to complete method7:		3.44093894958
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  6
+time to complete method1:		1.68056178093
+time to complete method2:		1.3841278553
+time to complete method2a:		1.40005993843
+time to complete method3:		11.6718139648
+time to complete method4:		1.57280302048
+time to complete method5:		12.0412211418
+time to complete method6:		1.09482598305
+time to complete method7:		10.3077950478
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  7
+time to complete method1:		8.6446788311
+time to complete method2:		4.52550911903
+time to complete method2a:		4.5119509697
+time to complete method3:		31.3361020088
+time to complete method4:		4.93015909195
+time to complete method5:		33.6285479069
+time to complete method6:		3.19748187065
+time to complete method7:		29.9308209419
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  8
+time to complete method1:		69.3468530178
+time to complete method2:		14.1315381527
+time to complete method2a:		14.0739719868
+time to complete method3:		109.554814816
+time to complete method4:		15.8508810997
+time to complete method5:		105.652959108
+time to complete method6:		10.6037929058
+time to complete method7:		88.9644958973
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  9
+time to complete method1:		667.374049902
+time to complete method2:		45.1118879318
+time to complete method2a:		44.8053970337
+time to complete method3:		402.776195049
+time to complete method4:		50.5066659451
+time to complete method5:		498.698968887
+time to complete method6:		31.1867721081
+time to complete method7:		401.065498114
+omega1 - omega2a=		0
+omega1 - omega3=		0
+omega1 - omega4=		0
+omega1 - omega5=		0
+omega1 - omega6=		0
+omega1 - omega7=		0
+product_threshold =  10
