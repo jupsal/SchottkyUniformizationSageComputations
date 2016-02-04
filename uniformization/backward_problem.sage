@@ -1,33 +1,40 @@
 ##############################################################################
 # This file should do the backward problem, i.e. starting from an algebraic
 # curve, get the group data.
+#
+# Requires: branch_pts
+#############################################################################
 
 import signal #For breaking up a function call if it is too slow
 import numpy as np
 
 def handler(signum, frame): #handler for signal
-	print "Forever is over!"
-	raise Exception("Computation of omega taking too long")
+	print "Calculation of the prime function taking too long. Consider lowering product_threshold or increasing max_time"
+	raise Exception("Exiting from build_prime_function")
 
+max_time = 30 # take at MOST 30 seconds to compute the prime function omega
 
-x,y = var('x,y')
-assume(x,'real'); assume(y,'real')
-zeta = x+I*y #local variable
-t = var('t') # for parametric plotting
 z = var('z') # complex variable not specified by x,y
 gamma = var('gamma') #base point for 'abelmap' or prime function
 
-circle_plot = False # If true, then 
+# Define option variables if they do not exist.
+if 'plot_circles' not in locals(): plot_circles = False # If true, then plot circles
+if 'plot_F' not in locals(): plot_F = False
+if 'prime_function_tests' not in locals():
+	prime_function_tests = False # Test to see if prime function is giving what you
+                             # want.
+if 'plot_branch_pts' not in locals(): plot_branch_pts = False
 
+
+product_threshold = 12 #this product_threshold determines the maximum number of terms in the product we take for omega.
 
 def main():
-	branch_pts = [-8,-6,-1/2,1/2,6,8] # i.e. y^2 = prod(x-e_j)
 	# Check to see that the branch points are labeled monotonically. If not we
 	# call an exception and ask for a monotonically increasing list.
 	if ~is_increasing(branch_pts):
 		raise Exception("The branch_pts list must be monotonically increasing")
 	
-	genus = branch_pts/2 # There are 2g branch_pts
+	genus = len(branch_pts)/2 # There are 2g branch_pts
 	if ~len(branch_pts)%2: raise Expection("Right now this module only works for
 		hyperelliptic curves with an even number of branch points")
 	
@@ -50,25 +57,20 @@ def main():
 	# There are 2g pre_branch_pts. We interlace them in this way to help with
 	# the algebraic problem below.
 	
-	# Define phi_j, needed for omega still!
-	phi_j = lambda j: delta[j] + q[j]^2*z/(1-delta[j].conjugate()*z) #phi_j(z)
-    # Make this into a list if we use phi_j more than just once.
-	
-	# Define the prime function, omega, algebraically
-	load("build_prime_function.sage")
-	threshold = 100 # this is probably big enough always. Break it off it
-					# takes too long!
+	# Define the phi_j and the prime function, omega, algebraically in the following module
+	load("build_prime_function.sage") # Now the function "build_prime_function" is available. Also gives local access to phi_j as a list
 
 	signal.signal(signal.SIGALRM,handler)
-	signal.alarm(200) #Let it take 200 seconds at most!
+	signal.alarm(max_time) #Let it take max_time seconds at most!
 	try:
-		omega = build_prime_function(threshold,genus) #STILL HAVE TO WRITE THIS
+		#see file "build_prime_function.sage" to see how this prime function builder construction works.
+		omega = build_prime_function(product_threshold) #STILL HAVE TO WRITE THIS
 	except Expection, exc
 		print exc
 
 	# Define the slit map, algebraically again
 	load("slitmap.sage")
-	slitmap = slitmap(blah) #NEED TO PUT THIS IN THERE
+	slitmap = build_slitmap()
 
 	# Map the pre_branch_pts to the branch points under the slit map. The result
 	# is an algebraic expression which we compare to the true branch_pts. There
@@ -92,12 +94,11 @@ def main():
 	q = [sol[cue] for cue in q]
 	
 	# Great! Now we have the circles. Plot them for funsies.
-	if circle_plot == True:
-		define_circle(delta,q)
-		# I really don't need to shade. That's only for presentation.
-		call("plot_circles.sage")
-
+	if plot_circles:
+		load("./plotting/plot_circles.sage") # Plot just the unit circle and the Cj
+	if plot_F: load("./plotting/plot_F.sage") # Plot the whole fundamental region
 	
+	return None #end main()
 
 
 
@@ -111,43 +112,6 @@ def define_group_data(genus):
 def is_increasing(list):
 	dx = np.diff(list)
 	return np.all(dx>=0)
-
-def define_circles(delta,q):
-	global C0, Cj, Cjp
-    C0 = exp(I*t)
-    Cj = lambda j: delta[j] + q[j]*exp(I*t)
-    Cjp = lambda j: 1/(Cj(j).conjugate()) #Reflection of Cj about the unit
-							#circle.
-	return None
-
-def define_plotting_circles(delta,q):
-    global C0_fill, Cj_fill, Cjp_fill
-    ## Define circles for filling regions D_zeta and D_zeta' as well.
-    C0_fill = abs(zeta)^2-1
-    Cj_fill = lambda j: abs(zeta-delta[j])^2 - q[j]^2
-    Cjp_fill = lambda j: abs(1/zeta.conjugate()-delta[j])^2 - q[j]^2
-
-    return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

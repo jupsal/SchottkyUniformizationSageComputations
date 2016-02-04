@@ -1,13 +1,10 @@
 ###############################################################################
 # Builds the Schottky group elements, phi_j, and the prime function using
-# "method6" of "test_prime_method"
+# "method6" of "test_prime_method2"
 # 
-# Requires: genus, phi, z, delta, q
+# Requires: genus, phi, z, delta, q, gamma, G, product_threshold
 #
 ###############################################################################
-
-from operator import itemgetter
-import time
 
 # Define phi as a list. A ton of function calls are made to it in iterate_words
 # so this should speed things up.
@@ -15,107 +12,28 @@ import time
 phi_j = [ delta[j] + q[j]^2*z/(1-z*delta[j].conjugate()) for j in xrange(genus)
 ]
 
+# Build_omegap below is a parallel function. It must be called as such, i.e. it must be called with a list input. 
+# e.g. omegap = build_prime_function(range(1,threshold+1)) #- Gives a list of generators
+# omegap = map(itemgetter(-1), omegap) #- need to grab the last element of the list for each generator
+# omega = (z-gamma)*reduce(operator.mul, omegap, 1) #- omegap is a list of functions found from the different word lengths. We need to multiply all of these together.
+
+
+# Define the main workhorse functions.
+
 @parallel
-def build_prime_function(word_length, genus)
-	G = FreeGroup(genus)
-	W = Words(genus, word_length)
-	output = map(lambda x: iterate_words(x,G),W)
-	# Now this is a vector, multiply all the elements and return
+def build_omegap(word_length)
+	W = Words(genus, word_length) # Get all words of word_length over genus elements
+	output = map(iterate_words,W) # Map the function iterate_words below onto W. The output is a list, multiply all of the elements associated with different WORDS then return.
 	return reduce(operator.mul, output, 1)
-
-def iterate_words(w,G):
-	wordlyfe = G(w)
-	phi_i = 
-
-	return 
+	
+def iterate_words(w):
+	wordlyfe = G(w) #Get the word in the free group associated with the right elements
+	phi_i = wordlyfe(phi_j) #Turn the free group elements and their composition into products of the phi_j
 	
 
+# Now actually build omega from omegap. 
+def build_prime_function(product_threshold):
+	omegap = build_omegap(range(1,product_threshold))
+	omegap = map(itemgetter(-1), omegap)
+	return (z-gamma)*reduce(operator.mul, omegap, 1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-G = FreeGroup(genus) #G is a free group on number = genus generators.
-
-time1 = time.time()
-#first just get it
-omegap = map(updateOmegap,range(1,product_threshold+1))
-#Then sum it up
-omegap = reduce(operator.mul,omegap,1)
-# We could do this all together once things are ready. Like this for now for
-# testing
-time2 = time.time()
-print str(time2-time1)
-
-## Now form the SK prime function,
-omega = (z - gamma)*omegap
-
-
-
-
-# This function, "updateOmegap2" should be replaced by something in which I
-# generate all possible words, i.e. x0, x1, x0x1,... in one list and then just
-# throw that straight into iterate_words
-
-####!! Compare this to the old method which you will have to find on github. This
-####!! one appears slow for the weird genus 3 example?
-
-def updateOmegap(word_length):
-#Works! Must call "reduce(operator.mul, OUTPUT,1)"
-        W = Words(genus, word_length) #Generator of words of length word_length
-					#over "genus" elements
-        output = iterate_words(W.list())
-	# Would really like to do iterate_words(W) in the above function call,
-	# i.e. throw in the generator. However, the parallelizer does not do
-	# what we want with that. It wants a list.
-        output = map(itemgetter(-1),output)
-        return reduce(operator.mul, output,1)
-
-@parallel
-def iterate_words(w):
-        wordlyfe = G(w) # for elements x0,x1,...,xn of the free group
-                                # and if indexlist=[1,2,...,p] (for p<n) this
-                                # gives x0*x1*...*xp for example.
-        phi_i = wordlyfe([phi_j(nn) for nn in range(genus)]) # Now we replace
-                                                # x0 with phi_j(0), (i.e.
-                                                # theta_0). This is now a
-                                                # function of z
-        return (phi_i - gamma)*(phi_i(z=gamma)-z)/((phi_i -
-                        z)*(phi_i(z = gamma) - gamma))
-
-
-### The above product is OBVIOUSLY very costly. Boooooo
-
-if (prime_function_tests): attach("prime_function_tests.sage")
