@@ -1,0 +1,39 @@
+
+Rewriting paths for your new installation directory
+===================================================
+
+This might take a few minutes but only has to be done once.
+
+patching /usr/lib/sagemath/src/build/cythonized/sage/structure/list_clone.c
+Using test \# 4 .........
+product_threshold =  3
+time to complete method1:		0.0
+time to complete method2:		10.6312718391
+time to complete method2a:		7.60328292847
+time to complete method3:		0.0
+time to complete method4:		8.41331386566
+time to complete method5:		1.19209289551e-06
+time to complete method6:		7.7530298233
+time to complete method7:		0.0
+product_threshold =  4
+time to complete method1:		0.0
+time to complete method2:		135.904551029
+time to complete method2a:		136.297849178
+time to complete method3:		0.0
+time to complete method4:		167.096065998
+time to complete method5:		0.0
+time to complete method6:		134.738878965
+time to complete method7:		0.0
+product_threshold =  5
+time to complete method1:		0.0
+Forever is over!
+method2
+Computation of omega taking too long
+Forever is over!
+method2a
+Computation of omega taking too long
+time to complete method3:		0.0
+Forever is over!
+method4
+Computation of omega taking too long
+time to complete method5:		9.53674316406e-07

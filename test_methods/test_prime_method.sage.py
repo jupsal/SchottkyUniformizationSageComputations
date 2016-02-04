@@ -8,9 +8,12 @@ from sage.all_cmdline import *   # import sage library
 # This has now been completed for tests 0 and 1 but got hung up on method1 for
 # test1. Try the next two.
 ###
-# This has now also beet completed for tests 2,3 but got hung up on method1 for
+# This has now also been completed for tests 2,3 but got hung up on method1 for
 # test3. Output in output2. Try it only on example 4
 ###
+# This has now been completed for test 4 but only for product_threshold = 3,4.
+# This is because methods 1,3,5,7 were all hanging. Try this again without any
+# of these methods. Output is in "output3"
 from operator import itemgetter
 import time
 import signal #For breaking up a function call if it is too slow
@@ -19,7 +22,6 @@ def handler(signum, frame): #handler for signal
 	print "Forever is over!"
 	raise Exception("Computation of omega taking too long")
 
-signal.signal(signal.SIGALRM,handler)
 
 
 x,y = var('x,y')
@@ -44,10 +46,11 @@ def main():
 			print 'product_threshold = ', str(threshold)
 
 			# -- Method 1 -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
-				omega1 = (z-gamma)*method1(len(q),threshold)
+				#omega1 = (z-gamma)*method1(len(q),threshold)
 				t1 = time.time()
 				print 'time to complete method1:		', str(t1-t0)
 			except Exception, exc:
@@ -55,7 +58,8 @@ def main():
 				print exc
 
 			# -- Method 2 -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
 				omegap = map(lambda x: method2(len(q),x), xrange(Integer(1),threshold+Integer(1)))
@@ -68,7 +72,8 @@ def main():
 				print exc
 
 				# -- Method 2a, try with list comprehension instead of map -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
 				omegap = [method2(len(q),x) for x in xrange(Integer(1),threshold+Integer(1))]
@@ -81,12 +86,13 @@ def main():
 				print exc
 
 				# -- Method 3 -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
-				omegap = [method3(len(q),x) for x in xrange(Integer(1),threshold+Integer(1))]
-				omegap = reduce(operator.mul,omegap,Integer(1))
-				omega3 = (z-gamma)*omegap
+				#omegap = [method3(len(q),x) for x in xrange(1,threshold+1)]
+				#omegap = reduce(operator.mul,omegap,1)
+				#omega3 = (z-gamma)*omegap
 				t1 = time.time()
 				print 'time to complete method3:		', str(t1-t0)
 			except Exception, exc:
@@ -94,7 +100,8 @@ def main():
 				print exc
 
 				# -- Method 4 -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
 				omega4 = (z-gamma)*method4(len(q),threshold)
@@ -105,10 +112,11 @@ def main():
 				print exc
 
 				# -- Method 5 -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
-				omega5 = (z-gamma)*method5(len(q),threshold)
+				#omega5 = (z-gamma)*method5(len(q),threshold)
 				t1 = time.time()
 				print 'time to complete method5:		', str(t1-t0)
 			except Exception, exc:
@@ -117,7 +125,8 @@ def main():
 
 				# -- Method 6 --  This does method 2 except it parallelizes method 2
 				# itself #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
 				omegap = \
@@ -132,25 +141,26 @@ def main():
 
 				# -- Method 7 - This just does method 3 except it parallelizes
 				# method 3 itself -- #
-			signal.alarm(Integer(200))
+			signal.signal(signal.SIGALRM,handler)
+			signal.alarm(Integer(300))
 			try:
 				t0 = time.time() #initial time
-				omegap = method7(\
-				zip(range(Integer(1),threshold+Integer(1)),[len(q)]*len(range(Integer(1),threshold+Integer(1)))))
-				omegap = map(itemgetter(-Integer(1)),omegap)
-				omega7 = (z-gamma)*reduce(operator.mul,omegap,Integer(1))
+				#omegap = method7(\
+				#zip(range(1,threshold+1),[len(q)]*len(range(1,threshold+1))))
+				#omegap = map(itemgetter(-1),omegap)
+				#omega7 = (z-gamma)*reduce(operator.mul,omegap,1)
 				t1 = time.time()
 				print 'time to complete method7:		', str(t1-t0)
 			except Exception, exc:
 				print 'method7'
 				print exc
 
-			print 'omega1 - omega2a=		', simplify(omega1-omega2a)
-			print 'omega1 - omega3=		', simplify(omega1-omega3)
-			print 'omega1 - omega4=		', simplify(omega1-omega4)
-			print 'omega1 - omega5=		', simplify(omega1-omega5)
-			print 'omega1 - omega6=		', simplify(omega1-omega6)
-			print 'omega1 - omega7=		', simplify(omega1-omega7)
+			#print 'omega1 - omega2a=		', simplify(omega1-omega2a)
+			#print 'omega1 - omega3=		', simplify(omega1-omega3)
+			#print 'omega1 - omega4=		', simplify(omega1-omega4)
+			#print 'omega1 - omega5=		', simplify(omega1-omega5)
+			#print 'omega1 - omega6=		', simplify(omega1-omega6)
+			#print 'omega1 - omega7=		', simplify(omega1-omega7)
 
 
 def choose_test(test_number):

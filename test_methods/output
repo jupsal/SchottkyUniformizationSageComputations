@@ -5,23 +5,99 @@ Rewriting paths for your new installation directory
 This might take a few minutes but only has to be done once.
 
 patching /usr/lib/sagemath/src/build/cythonized/sage/structure/list_clone.c
-Using test \# 4 .........
+Using test \# 0 .........
 product_threshold =  3
-time to complete method1:		16.4885511398
-time to complete method2:		7.46630096436
-time to complete method2a:		7.60987687111
-time to complete method3:		30.203150034
-time to complete method4:		8.2924618721
-time to complete method5:		31.4127368927
-time to complete method6:		7.6449239254
-time to complete method7:		30.1903829575
-omega1 - omega2a=		0
-omega1 - omega3=		0
-omega1 - omega4=		0
-omega1 - omega5=		0
-omega1 - omega6=		0
-omega1 - omega7=		0
+time to complete method6:		0.0547561645508
+time to complete method7:		0.0610618591309
 product_threshold =  4
-Forever is over!
-method1
-Computation of omega taking too long
+time to complete method6:		0.0733292102814
+time to complete method7:		0.0650029182434
+product_threshold =  5
+time to complete method6:		0.0905389785767
+time to complete method7:		0.0950450897217
+product_threshold =  6
+time to complete method6:		0.1321849823
+time to complete method7:		0.126175165176
+product_threshold =  7
+time to complete method6:		0.202996969223
+time to complete method7:		0.206190824509
+product_threshold =  8
+time to complete method6:		0.329723119736
+time to complete method7:		0.32439494133
+product_threshold =  9
+time to complete method6:		0.603372812271
+time to complete method7:		0.61319899559
+product_threshold =  10
+time to complete method6:		1.14906787872
+time to complete method7:		1.12054800987
+Using test \# 1 .........
+product_threshold =  3
+time to complete method6:		0.0762610435486
+time to complete method7:		0.07532787323
+product_threshold =  4
+time to complete method6:		0.130296945572
+time to complete method7:		0.117932081223
+product_threshold =  5
+time to complete method6:		0.278982162476
+time to complete method7:		0.270645856857
+product_threshold =  6
+time to complete method6:		0.754716873169
+time to complete method7:		0.748122930527
+product_threshold =  7
+time to complete method6:		2.21485996246
+time to complete method7:		2.2416138649
+product_threshold =  8
+time to complete method6:		6.87962198257
+time to complete method7:		6.91507697105
+product_threshold =  9
+time to complete method6:		21.9676110744
+time to complete method7:		24.2261619568
+product_threshold =  10
+time to complete method6:		69.712608099
+time to complete method7:		72.9142520428
+Using test \# 2 .........
+product_threshold =  3
+time to complete method6:		0.0571889877319
+time to complete method7:		0.0588221549988
+product_threshold =  4
+time to complete method6:		0.076886177063
+time to complete method7:		0.0797600746155
+product_threshold =  5
+time to complete method6:		0.096568107605
+time to complete method7:		0.0946199893951
+product_threshold =  6
+time to complete method6:		0.130409955978
+time to complete method7:		0.145243883133
+product_threshold =  7
+time to complete method6:		0.197548866272
+time to complete method7:		0.194361925125
+product_threshold =  8
+time to complete method6:		0.332516908646
+time to complete method7:		0.339313030243
+product_threshold =  9
+time to complete method6:		0.630447864532
+time to complete method7:		0.643675088882
+product_threshold =  10
+time to complete method6:		1.14702796936
+time to complete method7:		1.08096885681
+Using test \# 3 .........
+product_threshold =  3
+time to complete method6:		0.10894203186
+time to complete method7:		0.112187862396
+product_threshold =  4
+time to complete method6:		0.281322956085
+time to complete method7:		0.271403074265
+product_threshold =  5
+time to complete method6:		1.0223338604
+time to complete method7:		0.988161087036
+product_threshold =  6
+time to complete method6:		4.16210389137
+time to complete method7:		4.07899594307
+product_threshold =  7
+time to complete method6:		17.7063519955
+time to complete method7:		17.7965860367
+product_threshold =  8
+time to complete method6:		76.9882771969
+time to complete method7:		79.5363931656
+product_threshold =  9
+time to complete method6:		331.260241032
