@@ -54,10 +54,7 @@ plot_branch_pts=False, product_threshold=12, max_time=200):
 	omega = build_prime_function(delta, q, product_threshold)
 #	except Exception, exc: #stop if it takes too long.
 #		print exc
-	
-	# Test that the prime function obeys certain things we expect.
-	if prime_function_tests: test_prime_function(omega,delta,q)
-	
+
 	# Build the slitmap
 	slitmap = build_slitmap(omega)
 	
