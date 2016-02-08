@@ -1,6 +1,10 @@
 ##########################################################################
-# This file holds some examples for the backward problem. It is the starting place.
+# This file holds some examples for the backward problem. It is the starting
+# place
 #########################################################################
+
+import uniformization
+from uniformization.backward_problem import backward_problem
 
 plot_circles = True
 plot_F = False
@@ -9,7 +13,7 @@ plot_branch_pts = True
 
 def main():
 	branch_pts = define_branch_pts(0)
-	load("../backward_problem.sage") # Find out how to do this.
+	backward_problem(branch_pts,
 
 def define_branch_pts(example_num):
 	if example_num == 0: # start with genus 1, i.e. 2 branch pts
