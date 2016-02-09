@@ -1,7 +1,7 @@
 from sage.all import *
 from nose.plugins.skip import SkipTest
 
-from my_package.prime_function import build_prime_function
+from uniformization.prime_function import build_prime_function
 
 
 
