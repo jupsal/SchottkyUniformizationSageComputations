@@ -1,14 +1,9 @@
 ###############################################################################
 # This file should hold all of the stuff to do the forward problem, i.e. from
-# group data construct branch places and hence the algebraic curve.
-#
-# It requires: delta, q (group data)
+# group data construct branch places.
 ###############################################################################
 import signal #For breaking up a function call if it is too slow
 from sage.all import *
-#from plot_uniformization import *
-#from prime_function import build_prime_function, test_prime_function
-#from slitmap import *
 from uniformization.plot_uniformization import *
 from uniformization.prime_function import build_prime_function, test_prime_function
 from uniformization.slitmap import *
@@ -25,7 +20,6 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     # input:	
     # 	delta = list of centers of circles
     # 	q = list of radii of circles
-    # 	max_time = max time for prime function computation before timeout
     # 	prime_function_tests = Check to see if the prime function passes some
     # 							tests
     # 	slitmap_tests = Check to see if the slitmap passes some tests
@@ -37,6 +31,7 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     #   prec = precision of group data. Double or infinite. Double is faster.
     # 	product_threshold = determines the max number of terms in the prime \
     # 							function product
+    # 	max_time = max time for prime function computation before timeout
     #
     # output:
     # 	branch_pts = branch points obtained.
@@ -48,19 +43,19 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
 
     # Change group data to double or infinite precision
     if prec == 'double':
-        delta, q = map(CDF,delta), map(CDF,q) # Complex double
+        delta, q = map(CDF,delta), map(CDF, q) # Complex double
     elif (prec=='infinite' or prec=='inf'):
-        delta, q = map(CC,delta), map(CC,q) #infinite precision
+        delta, q = map(CC, delta), map(CC, q) #infinite precision
     else:
         raise TypeError("Either 'double' or 'infinite' precision must be " 
-                "entered for group data.")
+                "entered for 'prec'.")
     
     # Plot some stuff about the region if we want.
-    if plot_circles: circle_plots(delta,q) #returns plot
-    if plot_F: F_plot(delta,q) #returns plot
+    if plot_circles: circle_plots(delta, q) #returns plot
+    if plot_F: F_plot(delta, q) #returns plot
     
-# Build the prime function, but make sure it doesn't take too long
-    signal.signal(signal.SIGALRM,handler)
+	# Build the prime function, but make sure it doesn't take too long
+    signal.signal(signal.SIGALRM, handler)
     signal.alarm(max_time) #Let it take max_time seconds at most!
     try:
         omega = build_prime_function(delta, q, product_threshold)
@@ -68,7 +63,7 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
         print exc
     
     # Test that the prime function obeys certain things we expect.
-    if prime_function_tests: test_prime_function(omega,delta,q)
+    if prime_function_tests: test_prime_function(omega, delta, q)
     
     # Build the slitmap
     slitmap = build_slitmap(omega)

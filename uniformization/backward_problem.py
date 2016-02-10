@@ -1,43 +1,74 @@
 ##############################################################################
-# This file should do the backward problem, i.e. starting from an algebraic
-# curve, get the group data.
-#
-# Requires: branch_pts
+# This file should do the backward problem, i.e. starting from branch points of
+# an algebraic curve, get the group data.
 #############################################################################
 
 import signal #For breaking up a function call if it is too slow
 import numpy as np
+from sage.all import *
+from uniformization.plot_uniformization import *
+from uniformization.prime_function import build_prime_function, test_prime_function
+from uniformization.slitmap import *
 
 def handler(signum, frame): #handler for signal
-	print "Calculation of the prime function taking too long. Consider lowering product_threshold or increasing max_time"
+	print "Calculation of the prime function taking too long. Consider lowering
+                product_threshold or increasing max_time"
 	raise Exception("Exiting from build_prime_function")
 
-max_time = 30 # take at MOST 30 seconds to compute the prime function omega
+def backward_problem(branch_pts, prime_function_tests=False,
+slitmap_tests=False, slitmap_full=False, plot_circles=False, plot_F=False,
+plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
+    # input:	
+    # 	branch_pts = list of branch points
+    # 	prime_function_tests = Check to see if the prime function passes some
+    # 							tests
+    # 	slitmap_tests = Check to see if the slitmap passes some tests
+    # 	slitmap_full = Plot each component of the slitmap, for diagnostic
+    # 					reasons
+    # 	plot_circles = circle plot, unit circle and the Cj excised
+    # 	plot_F = Plots the whole fundamental domain, F, with shading
+    # 	plot_branch_pts = Plots the branch points with red xs
+    #   prec = precision of group data. Double or infinite. Double is faster.
+    # 	product_threshold = determines the max number of terms in the prime \
+    # 	max_time = max time for prime function computation before timeout
+    # 							function product
+    #
+    # output:
+    #   delta = list of centers of circles
+    #   q = list of radii of circles
 
-z = var('z') # complex variable not specified by x,y
-gamma = var('gamma') #base point for 'abelmap' or prime function
+    z = var('z') # complex variable not specified by x,y
+    gamma = var('gamma') #base point for 'abelmap' or prime function
+    
+    # Make sure we are in the hyperbollic case.
+	if len(branch_pts)%2 != 0: 
+        raise ValueError("Right now this module only works for
+		hyperelliptic curves with an even number of branch points. Try again
+        with len(branch_pts)%2=0")
 
-# Define option variables if they do not exist.
-if 'plot_circles' not in locals(): plot_circles = False # If true, then plot circles
-if 'plot_F' not in locals(): plot_F = False
-if 'prime_function_tests' not in locals():
-	prime_function_tests = False # Test to see if prime function is giving what you
-                             # want.
-if 'plot_branch_pts' not in locals(): plot_branch_pts = False
+    # Force the list to be monotonically increasing. 
+    branch_pts = sorted(branch_pts) # the lists are short enough rn 
+                                    # this probably isn't too slow. 
 
-
-product_threshold = 12 #this product_threshold determines the maximum number of terms in the product we take for omega.
-
-def main():
-	# Check to see that the branch points are labeled monotonically. If not we
-	# call an exception and ask for a monotonically increasing list.
-	if ~is_increasing(branch_pts):
-		raise Exception("The branch_pts list must be monotonically increasing")
-	
+    # Make sure no two branch points coincide
+    if duplicates_in_list(branch_pts):
+        raise ValueError("The list branch_pts cannot have duplicaties. This
+        program does not yet support branch_pts of multiplicity greater than 1")
+        
 	genus = len(branch_pts)/2 # There are 2g branch_pts
-	if ~len(branch_pts)%2: raise Expection("Right now this module only works for
-		hyperelliptic curves with an even number of branch points")
-	
+
+    # Change branch point data to double or infinite precision
+    if prec == 'double':
+        branch_pts = map(CDF, branch_pts) # Complex double field
+    elif:
+        branch_pts = map(CC, branch_pts) # infinite precision
+    else:
+        raise TypeError("Either 'double' or 'infinite' precision must be entered
+        for 'prec'")
+
+    # Plot the branch points if you want, not really necessary here.
+    if plot_branch_pts: branch_point_plot(branch_pts)
+
 	# Define the Cj algebraically
 	[delta,q] = define_group_data(genus) # We have delta[0] = delta_1, delta[1]
 								# = delta_2 etc. Kind of messy but it works out.
@@ -57,20 +88,29 @@ def main():
 	# There are 2g pre_branch_pts. We interlace them in this way to help with
 	# the algebraic problem below.
 	
-	# Define the phi_j and the prime function, omega, algebraically in the following module
-	load("build_prime_function.sage") # Now the function "build_prime_function" is available. Also gives local access to phi_j as a list
+	# Define the prime function algebraically, make sure it doesn't take too
+    # long!
+    signal.signal(signal.SIGALRM)
+    signal.alarm(max_time) #Let it take max_time seconds at most!
+    try:
+        omega = build_prime_function(delta, q, product_threshold)
+    except Exception, exc: #stop if it takes too long
+        print exc
+    
+    # Test that the prime function obeys certain things that we expect.
+    if prime_function_tests: test_prime_function(omega, delta, q)
 
-	signal.signal(signal.SIGALRM,handler)
-	signal.alarm(max_time) #Let it take max_time seconds at most!
-	try:
-		#see file "build_prime_function.sage" to see how this prime function builder construction works.
-		omega = build_prime_function(product_threshold) #STILL HAVE TO WRITE THIS
-	except Expection, exc:
-		print exc
-
+    
 	# Define the slit map, algebraically again
-	load("slitmap.sage")
-	slitmap = build_slitmap()
+	slitmap = build_slitmap(omega)
+
+    # Test the slit map if we want -- IS THIS ALLOWED FOR ALGEBRAICALLY DEFINED
+    # OMEGA?
+    if slitmap_tests: test_slitmap(slitmap) 
+
+    # Build the slitmap piece by piece for diagnostic purposes. -- IS THIS
+    # ALLOWED FOR ALGEBRAICALLY DEFINED OMEGA?
+    if slitmap_full: build_slitmap_detailed(omega, delta, q)
 
 	# Map the pre_branch_pts to the branch points under the slit map. The result
 	# is an algebraic expression which we compare to the true branch_pts. There
@@ -94,11 +134,11 @@ def main():
 	q = [sol[cue] for cue in q]
 	
 	# Great! Now we have the circles. Plot them for funsies.
-	if plot_circles:
-		load("./plotting/plot_circles.sage") # Plot just the unit circle and the Cj
-	if plot_F: load("./plotting/plot_F.sage") # Plot the whole fundamental region
+	if plot_circles: circle_plots(delta, q) # Plot just the unit circle and the
+                                            # Cj
+	if plot_F: F_plot(delta, q) # Plot the whole fundamental region
 	
-	return None #end main()
+	return delta, q
 
 
 
@@ -109,27 +149,7 @@ def define_group_data(genus):
 							# start at 1 to agree with the paper.
 	return delta, q
 	
-def is_increasing(list):
-	dx = np.diff(list)
-	return np.all(dx>=0)
+def duplicates_in_list(listy):
+    dx = np.diff(listy)
+    return np.any(dx==0) # returns true if any duplicates
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()
