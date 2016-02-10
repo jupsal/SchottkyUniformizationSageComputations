@@ -49,6 +49,11 @@ def build_omegap(word_length):
 	
 # This is the workhorse helper function
 def iterate_words(w):
+#   input:
+#       w = a word
+#   output:
+#       one term in the product of the prime function
+#
     gamma = var('gamma')
     z = var('z')
     wordlyfe = GGroup(w) # Get the word in the free group associated with the
@@ -64,10 +69,22 @@ def test_prime_function(omega, delta, q):
 # Run various tests on the prime function to see that it is calculated well.
 # Right now we only have very basic tests. Add more complex ones later?
 #
-# requires: omega, delta, q
+#   input:
+#       omega = SK prime function
+#       delta = list of center of circles from group data. Numerical or symbolic
+#       q = list of radii of circles from group data. Numerical or symbolic
+#   output: 
+#       a bunch of printed output, returns None
 ##############################################################################
     z = var('z')
     gamma = var('gamma')
+    # Check to see if we are given a symbolic or numeric expression for omega,
+    # delta, q
+    if type(z)==type(delta[0]):
+        input_type = 'symbolic'
+    else:
+        input_type = 'numeric'
+    
     genus = len(q)
     phi_j = [ delta[j] + q[j]**2*z/(1-z*delta[j].conjugate()) for j in
                                  xrange(genus)]
@@ -86,61 +103,64 @@ def test_prime_function(omega, delta, q):
         test='Passed'  #should=0
     print 'prime function test 2:                       ', test
     
-    ## There should be a pole at the fixed points of phi_j. These are given
-    ## analytically by
-    pole_pt1 = lambda k: (1+norm(delta[k]) - q[k]**2 + sqrt(-4*norm(delta[k])
-        +(1+norm(delta[k]) - q[k]**2)**2))/(2*delta[k].conjugate())
-    pole_pt2 = lambda k: (1+norm(delta[k]) - q[k]**2 - sqrt(-4*norm(delta[k])
-        +(1+norm(delta[k]) - q[k]**2)**2))/(2*delta[k].conjugate())
-    # -- Recall, above, that norm(x+I*y) = x^2 + y^2 in sage
-    ## First make sure that these are in fact fixed points of phi_j
-    test = 'Failed'
-    pole_sum1 = sum( [N( phi_j[k](z=pole_pt1(k)) - pole_pt1(k)) for k in
-                                range(genus)] )
-    pole_sum2 = sum( [N( phi_j[k](z=pole_pt2(k)) - pole_pt2(k)) for k in
-                                range(genus)] )
-    if abs( pole_sum1 + pole_sum2 ) < exp(-28): test='Passed'
-    print 'Pole points verified:                        ', test
-    print abs(pole_sum1 + pole_sum2)
+    ######## -- The pole tests can only be completed for numeric delta, q, omega
+    if input_type=='numeric':
+        ## There should be a pole at the fixed points of phi_j. These are given
+        ## analytically by
+        pole_pt1 = lambda k: (1+norm(delta[k]) - q[k]**2 + sqrt(-4*norm(delta[k])
+            +(1+norm(delta[k]) - q[k]**2)**2))/(2*delta[k].conjugate())
+        pole_pt2 = lambda k: (1+norm(delta[k]) - q[k]**2 - sqrt(-4*norm(delta[k])
+            +(1+norm(delta[k]) - q[k]**2)**2))/(2*delta[k].conjugate())
+        # -- Recall, above, that norm(x+I*y) = x^2 + y^2 in sage
+        ## First make sure that these are in fact fixed points of phi_j
+        test = 'Failed'
+        pole_sum1 = sum( [N( phi_j[k](z=pole_pt1(k)) - pole_pt1(k)) for k in
+                                    range(genus)] )
+        pole_sum2 = sum( [N( phi_j[k](z=pole_pt2(k)) - pole_pt2(k)) for k in
+                                    range(genus)] )
+        if abs( pole_sum1 + pole_sum2 ) < exp(-28): test='Passed'
+        print 'Pole points verified:                        ', test
+        print abs(pole_sum1 + pole_sum2)
+        
+        ## If we just plug these in we should get an error. To check let's perturb a
+        ## little and plug in a particular value of gamma!
+        test = 'Failed'
+        sum1 = sum( [N( omega(z = pole_pt1(k) + 1e-10, gamma = 1) + omega(z =
+            pole_pt2(k) + 1e-10, gamma = 1) ) for k in range(genus)] )
+        sum2 = sum( [N( omega(z = pole_pt1(k) + 1e-13, gamma = 1) + omega(z = 
+            pole_pt2(k) + 1e-13, gamma = 1) ) for k in range(genus)] )
+        sum3 = sum( [N( omega(z = pole_pt1(k) + 1e-15, gamma = 1) + omega(z = 
+            pole_pt2(k) + 1e-15, gamma = 1) ) for k in range(genus)] )
+        if ( (abs(sum3)>abs(sum2)) and (abs(sum2)>abs(sum1)) ):
+            test = 'Passed'
+        print 'test3:                                       ', test
+        ### Something strange is happening above when product_threshold>8 ish
+        
+        ### The above sequence should be increasing, check!
+        test = 'Failed'
+        sum1 = sum( [N( omega(z = pole_pt2(k) + 1e-10, gamma = 1) + omega(z = 
+            pole_pt2(k) + 1e-10, gamma = -1) ) for k in range(genus)] )
+        sum2 = sum( [N( omega(z = pole_pt2(k) + 1e-13, gamma = 1) + omega(z = 
+            pole_pt2(k) + 1e-13, gamma = -1) ) for k in range(genus)] )
+        sum3 = sum( [N( omega(z = pole_pt2(k) + 1e-15, gamma = 1) + omega(z = 
+            pole_pt2(k) + 1e-15, gamma = -1) ) for k in range(genus)] )
+        ### This one too! check!
+        if ( (abs(sum3)>abs(sum2)) and (abs(sum2)>abs(sum1)) ):
+            test = 'Passed'
+        print 'test4:                                       ', test
     
-    ## If we just plug these in we should get an error. To check let's perturb a
-    ## little and plug in a particular value of gamma!
-    test = 'Failed'
-    sum1 = sum( [N( omega(z = pole_pt1(k) + 1e-10, gamma = 1) + omega(z =
-        pole_pt2(k) + 1e-10, gamma = 1) ) for k in range(genus)] )
-    sum2 = sum( [N( omega(z = pole_pt1(k) + 1e-13, gamma = 1) + omega(z = 
-        pole_pt2(k) + 1e-13, gamma = 1) ) for k in range(genus)] )
-    sum3 = sum( [N( omega(z = pole_pt1(k) + 1e-15, gamma = 1) + omega(z = 
-        pole_pt2(k) + 1e-15, gamma = 1) ) for k in range(genus)] )
-    if ( (abs(sum3)>abs(sum2)) and (abs(sum2)>abs(sum1)) ):
-        test = 'Passed'
-    print 'test3:                                       ', test
-    ### Something strange is happening above when product_threshold>8 ish
-    
-    ### The above sequence should be increasing, check!
-    test = 'Failed'
-    sum1 = sum( [N( omega(z = pole_pt2(k) + 1e-10, gamma = 1) + omega(z = 
-        pole_pt2(k) + 1e-10, gamma = -1) ) for k in range(genus)] )
-    sum2 = sum( [N( omega(z = pole_pt2(k) + 1e-13, gamma = 1) + omega(z = 
-        pole_pt2(k) + 1e-13, gamma = -1) ) for k in range(genus)] )
-    sum3 = sum( [N( omega(z = pole_pt2(k) + 1e-15, gamma = 1) + omega(z = 
-        pole_pt2(k) + 1e-15, gamma = -1) ) for k in range(genus)] )
-    ### This one too! check!
-    if ( (abs(sum3)>abs(sum2)) and (abs(sum2)>abs(sum1)) ):
-        test = 'Passed'
-    print 'test4:                                       ', test
-    
-    # We also check to see if (5.17) holds, it doesn't unless we take the
-    # infinite
-    # product, but should approach it as the product_threshold increases! Again
-    # choose a number for gamma
-    fiveone7a = omega(z = 1/z.conjugate(), gamma = 1/gamma.conjugate())
-    fiveone7 = fiveone7a.conjugate() + omega/(z*gamma)
-    fiveone7test = abs(N(fiveone7(z=3+I*3,gamma=1)) )
-    print 'test5, (5.17) should be as small as possible:        ', str(fiveone7test)
-    fiveone7testb = abs(N(fiveone7(z=0.7+0.1*I,gamma=1)) )
-    print 'test6, (5.17) should be as small as possible:        ', \
-    			str(fiveone7testb)
+        # We also check to see if (5.17) holds, it doesn't unless we take the
+        # infinite
+        # product, but should approach it as the product_threshold increases! Again
+        # choose a number for gamma
+        fiveone7a = omega(z = 1/z.conjugate(), gamma = 1/gamma.conjugate())
+        fiveone7 = fiveone7a.conjugate() + omega/(z*gamma)
+        fiveone7test = abs(N(fiveone7(z=3+I*3,gamma=1)) )
+        print 'test5, (5.17) should be as small as possible:        ', \
+                    str(fiveone7test)
+        fiveone7testb = abs(N(fiveone7(z=0.7+0.1*I,gamma=1)) )
+        print 'test6, (5.17) should be as small as possible:        ', \
+        			str(fiveone7testb)
     
     
     # The SK-prime function should also be symmetric in its arguments. I.e. one
@@ -150,6 +170,6 @@ def test_prime_function(omega, delta, q):
     pvar = var('pvar'); qvar = var('qvar')
     if ( simplify(omega(z=pvar,gamma=qvar)+omega(z=qvar,gamma=pvar)) ) == 0:
         test = 'Passed'
-    print 'test7:                                   ', test
+    print 'test7:                                       ', test
     
     print '---------------- End Prime Function Tests --------------------'

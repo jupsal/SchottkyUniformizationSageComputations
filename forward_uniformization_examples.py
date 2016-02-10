@@ -12,15 +12,16 @@ plot_F = True
 prime_function_tests = True
 plot_branch_pts = True
 slitmap_tests = True
+slitmap_full = True
 prec = 'double' # inf precision takes just a little bit longer for example 2
-example_number = 2 #choose from the examples below.
+example_number = 1 #choose from the examples below.
 
 def main():
     delta, q = define_group_data(example_number)
     branch_pts = forward_problem(delta,q, plot_circles=plot_circles,
     plot_F=plot_F, prime_function_tests=prime_function_tests, 
-    plot_branch_pts=plot_branch_pts, product_threshold=4, max_time=200,
-    prec = prec )
+    plot_branch_pts=plot_branch_pts, product_threshold=3, max_time=200,
+    prec = prec, slitmap_full=slitmap_full )
     # right now this fails for product_threshold > 8, for example_num = 2
     print branch_pts
 

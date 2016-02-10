@@ -24,6 +24,7 @@ def build_slitmap_detailed(omega, delta, q):
     #       = image of the appropriate circles under the appropriate maps. Given
     #           as a list in the Cj case.
     
+    t = var('t', domain='real') 
     genus = len(q)
 
     colors = [(0.6*random(),random(),random()) for k in range(genus)] #For plotting,
@@ -75,7 +76,7 @@ def build_slitmap_detailed(omega, delta, q):
     zedplot.show(title='zedplot')
 
     return zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0,\
-            zeddata	
+            zeddataCj
 
 # Test various things about the slitmap
 def test_slitmap(slitmap):
