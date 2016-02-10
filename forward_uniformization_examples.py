@@ -18,7 +18,7 @@ example_number = 1 #choose from the examples below.
 
 def main():
     delta, q = define_group_data(example_number)
-    branch_pts = forward_problem(delta,q, plot_circles=plot_circles,
+    branch_pts = forward_problem(delta, q, plot_circles=plot_circles,
     plot_F=plot_F, prime_function_tests=prime_function_tests, 
     plot_branch_pts=plot_branch_pts, product_threshold=3, max_time=200,
     prec = prec, slitmap_full=slitmap_full )

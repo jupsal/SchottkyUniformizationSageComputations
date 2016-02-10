@@ -17,6 +17,11 @@ def handler(signum, frame): #handler for signal
 def forward_problem(delta, q, prime_function_tests=False,
 slitmap_tests=False, slitmap_full=False, plot_circles=False, plot_F=False, 
 plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
+    #
+    # This module does the full forward problem. Starting with group data,
+    # construct the SK prime function, the slitmap, and hence the branch points
+    # of an algebraic curve. 
+    #
     # input:	
     # 	delta = list of centers of circles
     # 	q = list of radii of circles
@@ -43,18 +48,30 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
 
     # Change group data to double or infinite precision
     if prec == 'double':
-        delta, q = map(CDF,delta), map(CDF, q) # Complex double
+        delta, q = map(CDF, delta), map(CDF, q) # Complex double
     elif (prec=='infinite' or prec=='inf'):
         delta, q = map(CC, delta), map(CC, q) #infinite precision
     else:
         raise TypeError("Either 'double' or 'infinite' precision must be " 
                 "entered for 'prec'.")
     
+
+    # Before plotting, define a uniform color scheme to be used throughout all
+    # plots so we can keep track of which circle is which.
+    circle_colors = [ (0.6*random(), random(), random()) for k in xrange(genus)
+                        ]
     # Plot some stuff about the region if we want.
-    if plot_circles: circle_plots(delta, q) #returns plot
-    if plot_F: F_plot(delta, q) #returns plot
+    if plot_circles: 
+        D_zeta=circle_plots(delta, q, colors=circle_colors) #returns plot data
+        D_zeta.show(axes = True, title='$D_{\zeta}$', aspect_ratio = 1) 
+        # show and put on an equal-axis plot
+
+    if plot_F:
+        D_zeta=F_plot(delta, q, colors=circle_colors) #returns plot data
+        D_zeta.show(axes = True, title='$D_{\zeta}$')
+        # show, but maybe not on equal-axis plot.
     
-	# Build the prime function, but make sure it doesn't take too long
+    # Build the prime function, but make sure it doesn't take too long
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(max_time) #Let it take max_time seconds at most!
     try:
@@ -72,7 +89,8 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     if slitmap_tests: test_slitmap(slitmap)
     
     # Build the slitmap piece by piece for diagnostic purposes.
-    if slitmap_full: build_slitmap_detailed(omega, delta, q)
+    if slitmap_full: build_slitmap_detailed(omega, delta, q,
+                circle_colors=circle_colors)
     # this thing can output some stuff for use, but for now it just plots. 
     
     
@@ -89,7 +107,104 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     branch_pts = [slitmap(z = bp) for bp in pre_branch_pts]
     
     # Simple plot of branch points if interested. Shows location.
-    if plot_branch_pts: branch_point_plot(branch_pts)
+    if plot_branch_pts:
+        branch_plot=branch_point_plot(branch_pts)
+        branch_plot.show(axes = True, title='Branch Points')
     
     return branch_pts
+
+def forward_problem_on_points_and_lines(
+        delta, q, points, plot_circles=True, ## ADD LINES
+        slitmap_full=True, slitmap_direct=False, prec='double', 
+        product_threshold=5, max_time=200, prime_function_tests=False, 
+        slitmap_tests=False
+        ):
+    #
+    # This module does the forward problem with test point(s) and line(s) in
+    # place. I.e. it places a point somewhere in the fundamental domain, F, 
+    # then tracks it as we do the slitmap. Usually we do this using 
+    # slitmap_full which will be the default, however, there is a flag for
+    # this.
+    #
+    # input:
+    #   delta = centers of circles, list
+    #   q = radii of circles, list
+    #   points = points to plot in the domain, list
+    #   lines = lines to plot in the domain, list
+    #   plot_circles = plot the circles from the group data and the
+    #       points and lines in the fundamental domain together.
+    #   slitmap_full = build the full slitmap, from zeta1, zeta2, z
+    #   slitmap_direct = build the slitmap all in one step. Minimum output.
+    #   prec = double or infinite precision of the group data?
+    # 	product_threshold = determines the max number of terms in the prime \
+    # 							function product
+    # 	max_time = max time for prime function computation before timeout
+    # 	prime_function_tests = Check to see if the prime function passes some
+    # 							tests
+    # 	slitmap_tests = Check to see if the slitmap passes some tests
+    #
+    # output:
+    #   only plots
+    #
+    z = var('z') # complex variable
+    gamma = var('gamma') #base point for 'abelmap' or prime function
+    
+    genus = len(q)
+
+    # Generate colors for plotting here since we want them to be uniform across
+    # plot_circles and slitmap plots
+    circle_colors = [ (0.6*random(), random(), random()) for k in 
+            xrange(genus) ]
+    point_and_line_colors = [ (0.6*random(), random(), random()) for k in
+            xrange(len(points)) ] # + len(lines)
+    # We multiply the "R" by 0.6 so nothing is too red.
+
+    # Change group data to double or infinite precision
+    if prec == 'double':
+        delta, q = map(CDF, delta), map(CDF, q) # Complex double
+        points = map(CDF, points)
+    elif (prec=='infinite' or prec=='inf'):
+        delta, q = map(CC, delta), map(CC, q) #infinite precision
+        points = map(CC, points)
+    else:
+        raise TypeError("Either 'double' or 'infinite' precision must be " 
+                "entered for 'prec'.")
+    
+    # Plot some stuff about the region if we want.
+    if plot_circles:
+        D_zeta = circles_and_points_plot(delta, q, points,
+                circle_colors=circle_colors,
+                colors=point_and_line_colors) #returns plot data
+        D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
+        # show and put on an equal-axis plot
+    
+    # Build the prime function, but make sure it doesn't take too long
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(max_time) #Let it take max_time seconds at most!
+    try:
+        omega = build_prime_function(delta, q, product_threshold)
+    except Exception, exc: #stop if it takes too long.
+        print exc
+    
+    # Test that the prime function obeys certain things we expect.
+    if prime_function_tests: test_prime_function(omega, delta, q)
+    
+    # Build the slitmap in full, but right now the functionality does not exist
+    # to plot the image of the points in this module. Therefore, this is not
+    # advised to use now except to compare to the detailed slitmap to make sure
+    # that is working right. Therefore, it is advised for NOW.
+    if slitmap_direct:
+        slitmap = build_slitmap(omega)
+    
+    # Test the slit map
+    if slitmap_tests: test_slitmap(slitmap)
+    
+    # Build the slitmap piece by piece for diagnostic purposes. This now also
+    # plots the image of the desired points.
+    if slitmap_full: 
+        build_slitmap_detailed(omega, delta, q, points=points,
+                circle_colors=circle_colors, 
+                pointColors=point_and_line_colors)
+
+    return None
 

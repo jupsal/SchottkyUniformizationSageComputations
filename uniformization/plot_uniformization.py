@@ -6,9 +6,18 @@
 from sage.all import *
 
 # plot_circles plots ONLY the unit circle and the interior circle. No filling.
-def circle_plots(delta, q):
-    # delta = list of centers of circles
-    # q = radius of circles
+def circle_plots(delta, q, colors=[]):
+    #
+    # This module plots the circles from group data in the complex plane
+    # input:
+    #   delta = list of centers of circles
+    #   q = radius of circles
+    #   colors = list of len genus of RGBcolors for uniform plotting
+    # 
+    # output:
+    #   D_zeta = plot data. To show this plot it is recommended to use 
+    #       D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1)
+    #
     
     # Define our parametric plotting variable
     t = var('t')
@@ -19,9 +28,10 @@ def circle_plots(delta, q):
     C0 = exp(I*t)
     Cj = lambda j: delta[j] + q[j]*exp(I*t)
     
-    # Colors for plotting.
-    colors = [(0.6*random(),random(),random()) for k in range(genus)] #For plotting,
-                              #multiply the first one by 0.6 so nothing is TOO red
+    # Colors for plotting, if not already passed.
+    if len(colors)==0:
+        colors = [(0.6*random(),random(),random()) for k in range(genus)]
+         #For plotting, multiply the first one by 0.6 so nothing is TOO red
     
     # Plot the circles, identifying edges with like colors.
     ## First plot C_0
@@ -34,15 +44,21 @@ def circle_plots(delta, q):
     D_zeta += sum( [line( [CC(Cj(j)(t=v)) for v in srange(0,2*pi+0.2,0.1)],
     rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) ) for j in
     range(genus)] )
-    ## Show the graphic
-    D_zeta.show(axes = True, title='$D_{\zeta}$', aspect_ratio = 1) # show and
-                                                    # put on an equal-axis plot
+
+    return D_zeta
 	
 
-# plot_F plots the fundamential region, F, including filling and Cjp
-def F_plot(delta, q):
-    # delta = list of centers of circles
-    # q = radius of circles
+def F_plot(delta, q, colors=[]):
+    #
+    # This module  plots the fundamential region, F, including filling and Cjp
+    #
+    # input:
+    #   delta = list of centers of circles
+    #   q = radius of circles
+    #   colors = list of len genus of RGBcolors for uniform plotting
+    #
+    # output:
+    #   D_zeta = plot data
 
     # Define our parametric plotting variable
     t = var('t')
@@ -50,7 +66,7 @@ def F_plot(delta, q):
     genus = len(q)
     x,y = var('x,y', domain='real')
     zeta = x+I*y # For the fill plot.
-	
+
     # Define the C0, Cj, Cjp
     C0 = exp(I*t)
     Cj = [ delta[j] + q[j]*exp(I*t) for j in range(genus) ]
@@ -63,9 +79,12 @@ def F_plot(delta, q):
     Cjp_fill = [ norm(1/zeta.conjugate()-delta[j]) - q[j]**2 for j in
                 range(genus) ] # norm(z) = x^2+y^2, a sage syntax
     
-    # Colors for plotting
-    colors = [(0.6*random(),random(),random()) for k in range(genus)] #For plotting,
-                              #multiply the first one by 0.6 so nothing is TOO red
+    # Colors for plotting, if colors not already passed.
+    if len(colors)==0:
+        colors = [(0.6*random(),random(),random()) for k in range(genus)]
+         #For plotting, multiply the first one by 0.6 so nothing is TOO red
+
+	
     
     # Get the right viewing window. Calculate the maximum on the real axis
     xplot_range = [max( [ abs(circle.substitute(t=0)) for circle in Cjp ] )]
@@ -100,17 +119,51 @@ def F_plot(delta, q):
             for k in range(0,genus)], (x,-xplot_range,xplot_range),
             (y,-yplot_range,yplot_range), incol='blue', borderwidth=0, alpha=0.2
             )
-    ## Show the graphic
-    D_zeta.show(axes = True, title='$D_{zeta}$')
 	
-# Plots the branch points on the line
+    return D_zeta
+
 def branch_point_plot(b_pts):
+    #
+    # This module plots the branch points on the line
+    #
     # input:
     #	b_pts = branch points
     #
     # output:
-    # 	none
+    # 	branch_plot = plot data. Use  branch_plot.show(axes = True,
+    # 	title='Branch Points') to plot for example
+
     
     branch_plot = sum( [point( CC(bp), marker='x', size=50,
             rgbcolor='red' ) for bp in b_pts] )
-    branch_plot.show(axes = True, title='Branch Points')
+    return branch_plot
+
+def circles_and_points_plot(
+        delta, q, points, circle_colors=[], colors=[]
+        ):
+    #
+    # This module plots circles and test points in the domain together.
+    #
+    # input:
+    #   delta = list of centers of circles
+    #   q = radius of circles
+    #   points = test points in the domain
+    #   circle_colors = RGBcolors for plotting the circles. This is passed in
+    #   to uniformize across various plots
+    #   colors = RGBcolors for plotting the lines and points. This is passed
+    #   in to uniformize across various plots
+    # 
+    # output:
+    #   D_zeta = plot data
+    #
+
+    if len(colors)==0:
+        colors = [ (random(), random(), random()) for k in xrange(len(points)) ]
+    if len(circle_colors)==0:
+        circle_colors = [ (random(), random(), random()) for k in xrange(len(points)) ]
+
+    D_zeta = circle_plots(delta, q, colors=circle_colors)
+    D_zeta += sum( [ point( p, marker='x', size=50, rgbcolor=colors[itnum] ) for
+        itnum, p in enumerate(points) ] )
+
+    return D_zeta
