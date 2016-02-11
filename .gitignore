@@ -36,6 +36,8 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+.swo
+.swp
 
 # Other TeX things
 *.aux

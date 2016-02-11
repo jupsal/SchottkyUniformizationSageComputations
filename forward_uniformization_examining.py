@@ -4,8 +4,11 @@
 # slitmap
 ###############################################################################
 
+import numpy as np
+from warnings import warn
 import uniformization
 from uniformization.forward_problem import forward_problem_on_points_and_lines
+from sage.all import *
 #import forward_problem
 
 plot_circles = True
@@ -22,8 +25,13 @@ def main():
 
     points = [I/2, -I/2]
 
+    lines = [
+            define_line(-1./4+1./4*I, 1./4+1./4*I), 
+            define_line(-1./4-1./4*I, 1./4+1./4*I)
+            ]                
+    
     forward_problem_on_points_and_lines(
-        delta, q, points, plot_circles=True, slitmap_full=slitmap_full,
+        delta, q, points, lines, plot_circles=True, slitmap_full=slitmap_full,
         slitmap_direct=slitmap_direct, prec=prec, product_threshold=3,
         max_time=200, prime_function_tests=prime_function_tests,
         slitmap_tests=slitmap_tests
@@ -43,6 +51,26 @@ def define_group_data(example_num):
     
     if example_num == 2: #genus 2,
         return [-1./2,1./2], [1./4,1./4] # delta, q
+
+def define_line(x0, x1, field=CDF):
+    # 
+    # Defines a line from x0 to x1 as a collection of points.
+    #
+    # input:
+    #   x0 = starting point
+    #   x1 = ending point
+    #   field = underlying field. CDF by default but CC is also allowed.
+    #
+    # output:
+    #   line = collection of points
+    #
+    if (field != CDF and field != CC):
+        warn("Using a field different from CDF or CC will result in issues "
+                "with plotting these lines. Proceed with caution.",
+                RuntimeWarning)
+
+    line = [ field(x0 + t*(x1-x0)) for t in np.linspace(0,1,100) ]
+    return line
 
 
 if __name__ == '__main__':

@@ -138,32 +138,61 @@ def branch_point_plot(b_pts):
             rgbcolor='red' ) for bp in b_pts] )
     return branch_plot
 
-def circles_and_points_plot(
-        delta, q, points, circle_colors=[], colors=[]
-        ):
+def plot_points(
+    points, colors=[], mark='x', mark_size=50
+    ):
     #
-    # This module plots circles and test points in the domain together.
+    # This module plots points in a certain color
     #
     # input:
-    #   delta = list of centers of circles
-    #   q = radius of circles
-    #   points = test points in the domain
-    #   circle_colors = RGBcolors for plotting the circles. This is passed in
-    #   to uniformize across various plots
-    #   colors = RGBcolors for plotting the lines and points. This is passed
-    #   in to uniformize across various plots
+    #   points = points to plot, given as a list.
+    #   colors = RGBcolors for plotting the points. This is passed
+    #              in to uniformize colors across various plots
+    #   mark = marker for plotting. Default is 'x' to show it's there
+    #   mark_size = size of marker for plotting. Default is 50, it is big. Make
+    #              it smaller for lines etc.
     # 
     # output:
-    #   D_zeta = plot data
+    #   plot_data = plot output data. To be added to another plot ideally
     #
+    if len(colors)==0:
+        colors = [ (0.6*random(), random(), random()) for k in xrange(len(points)) ]
+    plot_data = sum( [ point( p, marker=mark, size=50, rgbcolor=colors[itnum] )
+        for itnum, p in enumerate(points) ] )
+    
+    return plot_data
+
+def plot_lines(
+    lines, colors=[], thicky_thick=2
+    ):
+    #
+    # This module plots lines in a certain color. This color is fixed for each
+    # line. The input MUST be CDF or CC.
+    #
+    # input:
+    #   lines = lines to plot, given as a list of lists. I.e. it must be the
+    #   case that lines[0]
+    #   colors = RGBcolors for plotting the points. This is often passed
+    #              in to uniformize colors across various plots
+    #   thicky_thick = line thickness for plotting
+    #   
 
     if len(colors)==0:
-        colors = [ (random(), random(), random()) for k in xrange(len(points)) ]
-    if len(circle_colors)==0:
-        circle_colors = [ (random(), random(), random()) for k in xrange(len(points)) ]
+        colors = [ (0.6*random(), random(), random()) for k in
+                         xrange(len(lines)) ]
 
-    D_zeta = circle_plots(delta, q, colors=circle_colors)
-    D_zeta += sum( [ point( p, marker='x', size=50, rgbcolor=colors[itnum] ) for
-        itnum, p in enumerate(points) ] )
+    # Check to see that the input is a list of lists
+    if type(lines[0]) != list:
+        raise TypeError("The argument 'lines' in plot_lines must be a list of "
+                " lists. Each element must be a list of complex numbers.")
 
-    return D_zeta
+    # Check to see that the input is CC or CDF type
+    if (lines[0][0].parent() != CDF and lines[0][0] != CC):
+        raise TypeError("The lines supplied to the module 'plot_lines' must be "
+                "either of type CC or CDF.")
+
+    plot_data = sum( [ line(L, rgbcolor=colors[itnum], thickness=thicky_thick) 
+        for itnum,L in enumerate(lines) ] )
+    
+    return plot_data
+

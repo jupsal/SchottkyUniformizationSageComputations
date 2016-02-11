@@ -5,6 +5,7 @@
 ###############################################################################
 
 from sage.all import *
+from uniformization.plot_uniformization import plot_lines, plot_points
 
 # Build the slitmap all in one step.
 def build_slitmap(omega):
@@ -12,7 +13,8 @@ def build_slitmap(omega):
                 omega(gamma=1)**2 )
 
 def build_slitmap_detailed(
-        omega, delta, q, points=[], pointColors=[], circle_colors=[]
+        omega, delta, q, points=[], lines=[], point_colors=[], circle_colors=[],
+        line_colors=[]
         ):
     #
     # This module builds the maps which, when composed, give the slitmap. Each
@@ -24,6 +26,13 @@ def build_slitmap_detailed(
     # 	delta = center of circles
     # 	q = radius of circles
     #   points(optional) = points whose image we wish to plot in the slitmap
+    #   lines(optional) = lines whose image we wish to plot in the slitmap
+    #   point_colors(optional) = colors for points, passable to keep things
+    #                           uniform
+    #   circle_colors(optional) = colors for circles, passable to keep things
+    #                           uniform
+    #   line_colors(optional) = colors for lines, passable to keep things
+    #                           uniform
     # 
     # output:
     #   zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0, zeddata 
@@ -63,14 +72,24 @@ def build_slitmap_detailed(
     # If 'points' is given as input, then plot them as well.
     if len(points)>0:
         # Check to see if we have colors passed in, if not create them
-        if len(pointColors)==0:
-            pointColors = [ (0.6*random(), random(), random()) for k in
+        if len(point_colors)==0:
+            point_colors = [ (0.6*random(), random(), random()) for k in
                                  xrange(len(points)) ]
 
         zeta1datapoints = [ CC(zeta1(z=p)) for p in points ]
-        zeta1plot += sum( [ point(p, marker='x', size=50,
-            rgbcolor=pointColors[itnum] ) for itnum, p in
-            enumerate(zeta1datapoints) ] )
+        zeta1plot += plot_points(zeta1datapoints, point_colors)
+        #zeta1plot += sum( [ point(p, marker='x', size=50,
+         #   rgbcolor=point_colors[itnum] ) for itnum, p in
+          #  enumerate(zeta1datapoints) ] )
+
+    if len(lines)>0:
+        # Check to see if we have colors passed in, if not create them
+        if len(line_colors)==0:
+            line_colors = [ (0.6*random(), random(), random()) for k in
+                                 xrange(len(lines)) ]
+
+        zeta1datalines = [ map(zeta1, L) for L in lines ]
+        zeta1plot += plot_lines(zeta1datalines, line_colors)
 
     zeta1plot.show(title='$\zeta_1$ plot')
     
@@ -79,9 +98,12 @@ def build_slitmap_detailed(
         analyze_plot = line(zeta1data, rgbcolor=circle_colors[itnum],
                         legend_label='C_'+str(itnum+1))
         if len(points)>0:
-            analyze_plot += sum( [ point( p, marker='x', size=50,
-                rgbcolor=pointColors[iternum] ) for iternum, p in
-                enumerate(zeta1datapoints) ] )
+            #analyze_plot += sum( [ point( p, marker='x', size=50,
+            #    rgbcolor=point_colors[iternum] ) for iternum, p in
+            #    enumerate(zeta1datapoints) ] )
+            analyze_plot += plot_points(zeta1datapoints, point_colors)
+        if len(lines)>0:
+            analyze_plot += plot_lines(zeta1datalines, line_colors)
     
         analyze_plot.show(title='Image of C_'+str(itnum+1)+' under $\zeta_1$')
         # Would like all graphics, but this one in particular, to be EPS format.
@@ -102,9 +124,14 @@ def build_slitmap_detailed(
     # If 'points' is given as input, then plot them as well.
     if len(points)>0:
         zeta2datapoints = [ CC(zeta2(z=p)) for p in zeta1datapoints ]
-        zeta2plot += sum( [ point( p, marker='x', size=50,
-            rgbcolor=pointColors[iternum] ) for iternum, p in
-            enumerate(zeta2datapoints) ] )
+        zeta2plot += plot_points(zeta2datapoints, point_colors)
+    #    zeta2plot += sum( [ point( p, marker='x', size=50,
+    #        rgbcolor=point_colors[iternum] ) for iternum, p in
+    #        enumerate(zeta2datapoints) ] )
+
+    if len(lines)>0:
+        zeta2datalines = [ map(zeta2,L) for L in zeta1datalines ]
+        zeta2plot += plot_lines(zeta2datalines, line_colors)
 
     zeta2plot.show(title='$\zeta_2$ plot', aspect_ratio = 1)
     
@@ -118,9 +145,14 @@ def build_slitmap_detailed(
     zedplot = line(zeddataC0, rgbcolor=(1,0,0), legend_label='C_0')
     if len(points)>0:
         zeddatapoints = [ CC(zed(z=p)) for p in zeta2datapoints ]
-        zedplot += sum( [ point( p, marker='x', size=50,
-            rgbcolor=pointColors[iternum] ) for iternum, p
-            in enumerate(zeddatapoints) ] )
+        zedplot += plot_points(zeddatapoints, point_colors)
+        #zedplot += sum( [ point( p, marker='x', size=50,
+        #    rgbcolor=point_colors[iternum] ) for iternum, p
+        #    in enumerate(zeddatapoints) ] )
+
+    if len(lines)>0:
+        zeddatalines = [ map(zed, L) for L in zeta2datalines ]
+        zedplot += plot_lines(zeddatalines, line_colors)
 
     zedplot.show(title='zedplot C_0')
     
@@ -129,6 +161,9 @@ def build_slitmap_detailed(
         enumerate(zeddataCj) ] )
 
     zedplot.show(title='zedplot')
+
+    #completely_different_Plot #### _!!! Can I use plot_lines on zedplot too?
+        # FOR SURE I CAN
 
     return zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0,\
             zeddataCj

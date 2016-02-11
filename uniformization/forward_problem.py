@@ -114,7 +114,7 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     return branch_pts
 
 def forward_problem_on_points_and_lines(
-        delta, q, points, plot_circles=True, ## ADD LINES
+        delta, q, points, lines, plot_circles=True,
         slitmap_full=True, slitmap_direct=False, prec='double', 
         product_threshold=5, max_time=200, prime_function_tests=False, 
         slitmap_tests=False
@@ -155,26 +155,30 @@ def forward_problem_on_points_and_lines(
     # plot_circles and slitmap plots
     circle_colors = [ (0.6*random(), random(), random()) for k in 
             xrange(genus) ]
-    point_and_line_colors = [ (0.6*random(), random(), random()) for k in
-            xrange(len(points)) ] # + len(lines)
+    point_colors = [ (0.6*random(), random(), random()) for k in
+            xrange(len(points)) ]
+    line_colors = [ (0.6*random(), random(), random()) for k in
+            xrange(len(lines)) ]
     # We multiply the "R" by 0.6 so nothing is too red.
 
     # Change group data to double or infinite precision
     if prec == 'double':
         delta, q = map(CDF, delta), map(CDF, q) # Complex double
         points = map(CDF, points)
+        lines = [ map(CDF, line) for line in lines ]
     elif (prec=='infinite' or prec=='inf'):
         delta, q = map(CC, delta), map(CC, q) #infinite precision
         points = map(CC, points)
+        lines = [ map(CC, line) for line in lines ]
     else:
         raise TypeError("Either 'double' or 'infinite' precision must be " 
                 "entered for 'prec'.")
     
     # Plot some stuff about the region if we want.
     if plot_circles:
-        D_zeta = circles_and_points_plot(delta, q, points,
-                circle_colors=circle_colors,
-                colors=point_and_line_colors) #returns plot data
+        D_zeta = circle_plots(delta, q, colors=circle_colors) 
+        D_zeta += plot_points(points, colors=point_colors)
+        D_zeta += plot_lines(lines, colors=line_colors)
         D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
         # show and put on an equal-axis plot
     
@@ -204,7 +208,8 @@ def forward_problem_on_points_and_lines(
     if slitmap_full: 
         build_slitmap_detailed(omega, delta, q, points=points,
                 circle_colors=circle_colors, 
-                pointColors=point_and_line_colors)
+                point_colors=point_colors,
+                line_colors=line_colors)
 
     return None
 
