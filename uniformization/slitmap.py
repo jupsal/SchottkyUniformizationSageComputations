@@ -13,8 +13,8 @@ def build_slitmap(omega):
                 omega(gamma=1)**2 )
 
 def build_slitmap_detailed(
-        omega, delta, q, points=[], lines=[], point_colors=[], circle_colors=[],
-        line_colors=[]
+        omega, delta, q, Points=[], Lines=[], point_colors=[], circle_colors=[],
+        line_colors=[], field=CDF
         ):
     #
     # This module builds the maps which, when composed, give the slitmap. Each
@@ -25,14 +25,16 @@ def build_slitmap_detailed(
     # 	omega = prime function
     # 	delta = center of circles
     # 	q = radius of circles
-    #   points(optional) = points whose image we wish to plot in the slitmap
-    #   lines(optional) = lines whose image we wish to plot in the slitmap
+    #   Points(optional) = points whose image we wish to plot in the slitmap
+    #   Lines(optional) = lines whose image we wish to plot in the slitmap
     #   point_colors(optional) = colors for points, passable to keep things
     #                           uniform
     #   circle_colors(optional) = colors for circles, passable to keep things
     #                           uniform
     #   line_colors(optional) = colors for lines, passable to keep things
     #                           uniform
+    #   field = which field do we want to work over? Must be CC or CDF for
+    #           plotting lines
     # 
     # output:
     #   zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0, zeddata 
@@ -58,52 +60,59 @@ def build_slitmap_detailed(
     
     # Start with zeta1
     zeta1 = -omega(gamma=1)/omega(gamma=-1) # -- for reference.
-    zeta1dataC0 = [CC(zeta1(z=C0(t=v))) for v in srange(0.0,2*pi+2*tstep,tstep)]
+    zeta1dataC0 = [field(zeta1(z=C0(t=v))) for v
+                                in srange(0.0,2*pi+2*tstep,tstep)]
                             #CC it from symbolic to complex for plotting!
-    zeta1dataCj = [ [ CC(zeta1(z=Cj(k)(t=v))) for v in\
+    zeta1dataCj = [ [ field(zeta1(z=Cj(k)(t=v))) for v in\
         srange(0.0,2*pi+2*tstep,tstep) ] for k in range(genus) ]
         # Produces something such that zeta1dataCj[k] gives the image
         # of C_k under zeta1 as a long list with (2*pi+0.2)/0.1 elements.
-    zeta1plot = line(zeta1dataC0, rgbcolor=(1,0,0), legend_label='C_0')
-    zeta1plot += sum( [ line( zeta1data, rgbcolor = circle_colors[itnum],
-        legend_label='C_'+str(itnum+1) ) for itnum, zeta1data in
-        enumerate(zeta1dataCj) ] )
+        # This can probably be optimized.
+
+    zeta1plot = line(zeta1dataC0, rgbcolor=(1,0,0), legend_label='C_0',
+                        linestyle='--')
+
+    zeta1plot += plot_lines( zeta1dataCj, colors=circle_colors, 
+                             group_circles=True )
+    #zeta1plot += sum( [ line( zeta1data, rgbcolor = circle_colors[itnum],
+    #    legend_label='C_'+str(itnum+1) ) for itnum, zeta1data in
+    #    enumerate(zeta1dataCj) ] )
 
     # If 'points' is given as input, then plot them as well.
-    if len(points)>0:
+    if len(Points)>0:
         # Check to see if we have colors passed in, if not create them
         if len(point_colors)==0:
             point_colors = [ (0.6*random(), random(), random()) for k in
-                                 xrange(len(points)) ]
+                                 xrange(len(Points)) ]
 
-        zeta1datapoints = [ CC(zeta1(z=p)) for p in points ]
+        zeta1datapoints = [ field(zeta1(z=p)) for p in Points ]
         zeta1plot += plot_points(zeta1datapoints, point_colors)
-        #zeta1plot += sum( [ point(p, marker='x', size=50,
-         #   rgbcolor=point_colors[itnum] ) for itnum, p in
-          #  enumerate(zeta1datapoints) ] )
 
-    if len(lines)>0:
+    if len(Lines)>0:
         # Check to see if we have colors passed in, if not create them
         if len(line_colors)==0:
             line_colors = [ (0.6*random(), random(), random()) for k in
-                                 xrange(len(lines)) ]
+                                 xrange(len(Lines)) ]
 
-        zeta1datalines = [ map(zeta1, L) for L in lines ]
-        zeta1plot += plot_lines(zeta1datalines, line_colors)
+        zeta1datalines = [ map(field,map(lambda g: zeta1(z=g), L)) for L
+                            in Lines ]
+        # Maybe this can be optimzed
+        zeta1plot += plot_lines(zeta1datalines, line_colors, thickness=2)
 
     zeta1plot.show(title='$\zeta_1$ plot')
+
+    #zeta1plot = plot_lines(zeta1datalines, line_colors)
+    #zeta1plot.show(title='WTF')
     
     ## If we want to examine the image of each circle more, plot one at a time:
     for itnum, zeta1data in enumerate(zeta1dataCj):
         analyze_plot = line(zeta1data, rgbcolor=circle_colors[itnum],
                         legend_label='C_'+str(itnum+1))
-        if len(points)>0:
-            #analyze_plot += sum( [ point( p, marker='x', size=50,
-            #    rgbcolor=point_colors[iternum] ) for iternum, p in
-            #    enumerate(zeta1datapoints) ] )
+        if len(Points)>0:
             analyze_plot += plot_points(zeta1datapoints, point_colors)
-        if len(lines)>0:
-            analyze_plot += plot_lines(zeta1datalines, line_colors)
+        if len(Lines)>0:
+            analyze_plot += plot_lines(zeta1datalines, line_colors,
+                    thickness=2)
     
         analyze_plot.show(title='Image of C_'+str(itnum+1)+' under $\zeta_1$')
         # Would like all graphics, but this one in particular, to be EPS format.
@@ -111,56 +120,77 @@ def build_slitmap_detailed(
     
     # Now do it for zeta2
     zeta2 = lambda z: (1-z)/(1+z)
-    zeta2dataC0 = [ zeta2(z=zeta1data) for zeta1data in zeta1dataC0 ]
-    zeta2dataCj = [ [ zeta2(z=zeta1dataCj[k][j]) for j in
+    zeta2dataC0 = [ field(zeta2(z=zeta1data)) for zeta1data in zeta1dataC0 ]
+    zeta2dataCj = [ [ field(zeta2(z=zeta1dataCj[k][j])) for j in
         xrange(len(zeta1dataCj[k])) ] for k in xrange(genus) ]
-    # zeta2dataCj can probably be made better with iterators, but blah RN
 
-    zeta2plot = line(zeta2dataC0, rgbcolor=(1,0,0), legend_label='C_0')
-    zeta2plot += sum( [ line( zeta2data, rgbcolor=circle_colors[itnum],
-        legend_label='C_'+str(itnum+1) ) for itnum, zeta2data in
-        enumerate(zeta2dataCj) ] )
+    # zeta2dataCj can probably be made better (optimize) with iterators,
+    # but blah RN
+
+    zeta2plot = line(zeta2dataC0, rgbcolor=(1,0,0), legend_label='C_0',
+            linestyle='--')
+    zeta2plot += plot_lines( zeta2dataCj, colors=circle_colors,
+            group_circles=True )
+    #zeta2plot += sum( [ line( zeta2data, rgbcolor=circle_colors[itnum],
+    #    legend_label='C_'+str(itnum+1) ) for itnum, zeta2data in
+    #    enumerate(zeta2dataCj) ] )
 
     # If 'points' is given as input, then plot them as well.
-    if len(points)>0:
-        zeta2datapoints = [ CC(zeta2(z=p)) for p in zeta1datapoints ]
+    if len(Points)>0:
+        zeta2datapoints = [ field(zeta2(z=p)) for p in zeta1datapoints ]
         zeta2plot += plot_points(zeta2datapoints, point_colors)
-    #    zeta2plot += sum( [ point( p, marker='x', size=50,
-    #        rgbcolor=point_colors[iternum] ) for iternum, p in
-    #        enumerate(zeta2datapoints) ] )
 
-    if len(lines)>0:
-        zeta2datalines = [ map(zeta2,L) for L in zeta1datalines ]
-        zeta2plot += plot_lines(zeta2datalines, line_colors)
+    if len(Lines)>0:
+        zeta2datalines = [ map(field, map(zeta2,L)) for L in zeta1datalines ]
+        zeta2plot += plot_lines(zeta2datalines, line_colors, thickness=2)
 
     zeta2plot.show(title='$\zeta_2$ plot', aspect_ratio = 1)
     
     zed = lambda z: 0.5*(1/z + z)
     # Now do it for zed (the last eqn in (5.18))
-    zeddataC0 = [ zed(z=zeta2data) for zeta2data in zeta2dataC0 ]
-    zeddataCj = [ [ zed(zeta2dataCj[k][j]) for j in xrange(len(zeta2dataCj[k]))
-        ] for k in range(genus) ]
-    # zeddataCj can probably be made better with iterators, but blah RN
+    zeddataC0 = [ field(zed(z=zeta2data)) for zeta2data in zeta2dataC0 ]
+    zeddataCj = [ [ field(zed(zeta2dataCj[k][j])) for j in 
+        xrange(len(zeta2dataCj[k])) ] for k in range(genus) ]
 
-    zedplot = line(zeddataC0, rgbcolor=(1,0,0), legend_label='C_0')
-    if len(points)>0:
-        zeddatapoints = [ CC(zed(z=p)) for p in zeta2datapoints ]
+    # zeddataCj can probably be made better (optimize) with iterators, 
+    # but blah RN
+
+    zedplot = line(zeddataC0, rgbcolor=(1,0,0), legend_label='C_0',
+                    linestyle='--')
+    # Get the axis range for plotting below with lines and points
+    ax_range = zedplot.get_axes_range()
+
+    if len(Points)>0:
+        zeddatapoints = [ field(zed(z=p)) for p in zeta2datapoints ]
         zedplot += plot_points(zeddatapoints, point_colors)
         #zedplot += sum( [ point( p, marker='x', size=50,
         #    rgbcolor=point_colors[iternum] ) for iternum, p
         #    in enumerate(zeddatapoints) ] )
 
-    if len(lines)>0:
-        zeddatalines = [ map(zed, L) for L in zeta2datalines ]
-        zedplot += plot_lines(zeddatalines, line_colors)
+    if len(Lines)>0:
+        zeddatalines = [ map(field,map(zed, L)) for L in zeta2datalines ]
+        zedplot += plot_lines(zeddatalines, line_colors, thickness=2)
 
     zedplot.show(title='zedplot C_0')
-    
-    zedplot += sum( [ line( zeddata, rgbcolor=circle_colors[itnum],
-        legend_label='C_'+str(itnum+1) ) for itnum, zeddata in
-        enumerate(zeddataCj) ] )
+
+    zedplot += plot_lines( zeddataCj, colors=circle_colors, 
+                            group_circles=True )
+    #zedplot += sum( [ line( zeddata, rgbcolor=circle_colors[itnum],
+    #    legend_label='C_'+str(itnum+1) ) for itnum, zeddata in
+    #    enumerate(zeddataCj) ] )
 
     zedplot.show(title='zedplot')
+
+    # But also plot the zedplot on [-1,1]^2, near C_0 in case the other lines
+    # are far away
+    zedplot.set_axes_range(-1,1,-1,1)
+    zedplot.show(title='zedplot on [-1,1]^2')
+    
+    # But also print the zedplot C_0 near C_0 in case the lines do interesting
+    # things near there. Use the data in ax_range
+    zedplot.set_axes_range( ax_range['xmin'], ax_range['xmax'], 
+            ax_range['ymin'], ax_range['ymax'] )
+    zedplot.show(title='zedplot near C_0')
 
     #completely_different_Plot #### _!!! Can I use plot_lines on zedplot too?
         # FOR SURE I CAN

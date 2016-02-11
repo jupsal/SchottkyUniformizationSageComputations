@@ -113,8 +113,8 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     
     return branch_pts
 
-def forward_problem_on_points_and_lines(
-        delta, q, points, lines, plot_circles=True,
+def forward_problem_on_Points_and_Lines(
+        delta, q, Points, Lines, plot_circles=True,
         slitmap_full=True, slitmap_direct=False, prec='double', 
         product_threshold=5, max_time=200, prime_function_tests=False, 
         slitmap_tests=False
@@ -129,8 +129,8 @@ def forward_problem_on_points_and_lines(
     # input:
     #   delta = centers of circles, list
     #   q = radii of circles, list
-    #   points = points to plot in the domain, list
-    #   lines = lines to plot in the domain, list
+    #   Points = points to plot in the domain, list
+    #   Lines = lines to plot in the domain, list
     #   plot_circles = plot the circles from the group data and the
     #       points and lines in the fundamental domain together.
     #   slitmap_full = build the full slitmap, from zeta1, zeta2, z
@@ -156,20 +156,20 @@ def forward_problem_on_points_and_lines(
     circle_colors = [ (0.6*random(), random(), random()) for k in 
             xrange(genus) ]
     point_colors = [ (0.6*random(), random(), random()) for k in
-            xrange(len(points)) ]
+            xrange(len(Points)) ]
     line_colors = [ (0.6*random(), random(), random()) for k in
-            xrange(len(lines)) ]
+            xrange(len(Lines)) ]
     # We multiply the "R" by 0.6 so nothing is too red.
 
     # Change group data to double or infinite precision
     if prec == 'double':
         delta, q = map(CDF, delta), map(CDF, q) # Complex double
-        points = map(CDF, points)
-        lines = [ map(CDF, line) for line in lines ]
+        Points = map(CDF, Points)
+        Lines = [ map(CDF, line) for line in Lines ]
     elif (prec=='infinite' or prec=='inf'):
         delta, q = map(CC, delta), map(CC, q) #infinite precision
-        points = map(CC, points)
-        lines = [ map(CC, line) for line in lines ]
+        Points = map(CC, Points)
+        Lines = [ map(CC, line) for line in Lines ]
     else:
         raise TypeError("Either 'double' or 'infinite' precision must be " 
                 "entered for 'prec'.")
@@ -177,8 +177,8 @@ def forward_problem_on_points_and_lines(
     # Plot some stuff about the region if we want.
     if plot_circles:
         D_zeta = circle_plots(delta, q, colors=circle_colors) 
-        D_zeta += plot_points(points, colors=point_colors)
-        D_zeta += plot_lines(lines, colors=line_colors)
+        D_zeta += plot_points(Points, colors=point_colors)
+        D_zeta += plot_lines(Lines, colors=line_colors, thickness=2)
         D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
         # show and put on an equal-axis plot
     
@@ -206,9 +206,8 @@ def forward_problem_on_points_and_lines(
     # Build the slitmap piece by piece for diagnostic purposes. This now also
     # plots the image of the desired points.
     if slitmap_full: 
-        build_slitmap_detailed(omega, delta, q, points=points,
-                circle_colors=circle_colors, 
-                point_colors=point_colors,
+        build_slitmap_detailed(omega, delta, q, Points=Points, Lines=Lines,
+                circle_colors=circle_colors, point_colors=point_colors,
                 line_colors=line_colors)
 
     return None

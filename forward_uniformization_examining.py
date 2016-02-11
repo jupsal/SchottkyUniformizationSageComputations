@@ -1,13 +1,13 @@
 ###############################################################################
 # This file holds some examples for examining the forward problem, i.e. by
-# plotting some points or lines or both and looking at their image under the
+# plotting some Points or lines or both and looking at their image under the
 # slitmap
 ###############################################################################
 
 import numpy as np
 from warnings import warn
 import uniformization
-from uniformization.forward_problem import forward_problem_on_points_and_lines
+from uniformization.forward_problem import forward_problem_on_Points_and_Lines
 from sage.all import *
 #import forward_problem
 
@@ -23,15 +23,16 @@ example_number = 1 #choose from the examples below.
 def main():
     delta, q = define_group_data(example_number)
 
-    points = [I/2, -I/2]
+    Points = [I/2, -I/2] # Use capital to avoid the weirdly used Points==point
+                            # in sage
 
-    lines = [
+    Lines = [
             define_line(-1./4+1./4*I, 1./4+1./4*I), 
             define_line(-1./4-1./4*I, 1./4+1./4*I)
-            ]                
+            ]                 # use capital L to be consistent with Points
     
-    forward_problem_on_points_and_lines(
-        delta, q, points, lines, plot_circles=True, slitmap_full=slitmap_full,
+    forward_problem_on_Points_and_Lines(
+        delta, q, Points, Lines, plot_circles=True, slitmap_full=slitmap_full,
         slitmap_direct=slitmap_direct, prec=prec, product_threshold=3,
         max_time=200, prime_function_tests=prime_function_tests,
         slitmap_tests=slitmap_tests
@@ -54,7 +55,7 @@ def define_group_data(example_num):
 
 def define_line(x0, x1, field=CDF):
     # 
-    # Defines a line from x0 to x1 as a collection of points.
+    # Defines a line from x0 to x1 as a collection of Points.
     #
     # input:
     #   x0 = starting point
@@ -62,7 +63,7 @@ def define_line(x0, x1, field=CDF):
     #   field = underlying field. CDF by default but CC is also allowed.
     #
     # output:
-    #   line = collection of points
+    #   line = collection of Points
     #
     if (field != CDF and field != CC):
         warn("Using a field different from CDF or CC will result in issues "

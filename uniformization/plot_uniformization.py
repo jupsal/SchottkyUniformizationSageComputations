@@ -6,13 +6,15 @@
 from sage.all import *
 
 # plot_circles plots ONLY the unit circle and the interior circle. No filling.
-def circle_plots(delta, q, colors=[]):
+def circle_plots(delta, q, colors=[], field=CDF):
     #
     # This module plots the circles from group data in the complex plane
     # input:
     #   delta = list of centers of circles
     #   q = radius of circles
     #   colors = list of len genus of RGBcolors for uniform plotting
+    #   field = which field do we want to work with? CDF by default because it's
+    #            cheapest. Should only get CC or CDF for this.
     # 
     # output:
     #   D_zeta = plot data. To show this plot it is recommended to use 
@@ -20,13 +22,13 @@ def circle_plots(delta, q, colors=[]):
     #
     
     # Define our parametric plotting variable
-    t = var('t')
-    assume(t,'real')
+    #t = var('t')
+    #assume(t,'real')
     genus = len(q)
     
     # Define the C0, Cj
-    C0 = exp(I*t)
-    Cj = lambda j: delta[j] + q[j]*exp(I*t)
+    C0 = lambda t: exp(I*t)
+    Cj = [ lambda t: delta[j] + q[j]*exp(I*t) for j in xrange(genus) ]
     
     # Colors for plotting, if not already passed.
     if len(colors)==0:
@@ -35,15 +37,22 @@ def circle_plots(delta, q, colors=[]):
     
     # Plot the circles, identifying edges with like colors.
     ## First plot C_0
-    D_zeta = line( [CC(C0(t=v)) for v in srange(0,2*pi+0.2,0.1)], linestyle='--',
-    rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
-    ## Plot the C_j
+    #D_zeta = line( [CC(C0(t=v)) for v in srange(0,2*pi+0.2,0.1)], linestyle='--',
+    #rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
+    D_zeta = line( [field(C0(v)) for v in srange(0,2*pi+0.2,0.1)], 
+            linestyle='--', rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
+
+    ## Plot the C_j. first create a list of lists so that CjData[0] is the 0th
+    ##    circle as a bunch of data points.
+    CjData = [ map(field,map(circle, srange(0,2*pi+0.2,0.1)))
+                for circle in Cj ]
+
+    D_zeta += plot_lines( CjData, colors=colors, thickness=3, 
+                            group_circles=True )
+    
     #D_zeta += sum( [line( [CC(Cj(j)(t=v)) for v in srange(0,2*pi+0.2,0.1)],
     #rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) ) for j in
     #range(genus)] )
-    D_zeta += sum( [line( [CC(Cj(j)(t=v)) for v in srange(0,2*pi+0.2,0.1)],
-    rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) ) for j in
-    range(genus)] )
 
     return D_zeta
 	
@@ -139,13 +148,13 @@ def branch_point_plot(b_pts):
     return branch_plot
 
 def plot_points(
-    points, colors=[], mark='x', mark_size=50
+    Points, colors=[], mark='x', mark_size=50
     ):
     #
     # This module plots points in a certain color
     #
     # input:
-    #   points = points to plot, given as a list.
+    #   Points = points to plot, given as a list.
     #   colors = RGBcolors for plotting the points. This is passed
     #              in to uniformize colors across various plots
     #   mark = marker for plotting. Default is 'x' to show it's there
@@ -156,14 +165,14 @@ def plot_points(
     #   plot_data = plot output data. To be added to another plot ideally
     #
     if len(colors)==0:
-        colors = [ (0.6*random(), random(), random()) for k in xrange(len(points)) ]
+        colors = [ (0.6*random(), random(), random()) for k in xrange(len(Points)) ]
     plot_data = sum( [ point( p, marker=mark, size=50, rgbcolor=colors[itnum] )
-        for itnum, p in enumerate(points) ] )
+        for itnum, p in enumerate(Points) ] )
     
     return plot_data
 
 def plot_lines(
-    lines, colors=[], thicky_thick=2
+    lines, colors=[], thickness=1, legend_list=[], group_circles=False
     ):
     #
     # This module plots lines in a certain color. This color is fixed for each
@@ -174,12 +183,25 @@ def plot_lines(
     #   case that lines[0]
     #   colors = RGBcolors for plotting the points. This is often passed
     #              in to uniformize colors across various plots
-    #   thicky_thick = line thickness for plotting
+    #   thickness = line thickness for plotting
+    #   l_label = legend label. By default there is not one.
+    #   group_circles = is this a plot of the circles from the group data? if
+    #                    so, make the legend appropriately.
     #   
 
+    num_lines = len(lines)
     if len(colors)==0:
         colors = [ (0.6*random(), random(), random()) for k in
-                         xrange(len(lines)) ]
+                         xrange(num_lines) ]
+
+    # If this is a circle plot, give the correct legends. This shows up so much
+    # it is worth putting here.
+    if group_circles:
+        legend_list = [ 'C_'+str(k+1) for k in xrange(len(lines)) ]
+
+    # Legend list must be a list of Nones if one was not entered
+    if len(legend_list)==0:
+        legend_list = [None]*num_lines
 
     # Check to see that the input is a list of lists
     if type(lines[0]) != list:
@@ -191,8 +213,9 @@ def plot_lines(
         raise TypeError("The lines supplied to the module 'plot_lines' must be "
                 "either of type CC or CDF.")
 
-    plot_data = sum( [ line(L, rgbcolor=colors[itnum], thickness=thicky_thick) 
-        for itnum,L in enumerate(lines) ] )
+    plot_data = sum([ line(L, rgbcolor=colors[itnum], thickness=thickness,
+                        legend_label=legend_list[itnum]) 
+                        for itnum,L in enumerate(lines)])
     
     return plot_data
 
