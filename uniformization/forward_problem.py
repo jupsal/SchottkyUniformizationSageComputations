@@ -117,7 +117,7 @@ def forward_problem_on_Points_and_Lines(
         delta, q, Points, Lines, plot_circles=True, plot_F=False,
         slitmap_full=True, slitmap_direct=False, prec='double', 
         product_threshold=5, max_time=200, prime_function_tests=False, 
-        slitmap_tests=False
+        slitmap_tests=False, point_size=80, save_plots=False
         ):
     #
     # This module does the forward problem with test point(s) and line(s) in
@@ -143,6 +143,8 @@ def forward_problem_on_Points_and_Lines(
     # 	prime_function_tests = Check to see if the prime function passes some
     # 							tests
     # 	slitmap_tests = Check to see if the slitmap passes some tests
+    # 	point_size = marker size for point_plot
+    #   save_plots = save the plots or just display them?
     #
     # output:
     #   only plots
@@ -178,17 +180,26 @@ def forward_problem_on_Points_and_Lines(
     # Plot some stuff about the region if we want.
     if plot_circles:
         D_zeta = circle_plots(delta, q, colors=circle_colors) 
-        D_zeta += plot_points(Points, colors=point_colors)
+        D_zeta += plot_points(Points, colors=point_colors, 
+                            mark_size=point_size)
         D_zeta += plot_lines(Lines, colors=line_colors, thickness=2)
-        D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
-        # show and put on an equal-axis plot
+
+        if save_plots==False:
+            D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
+            # show and put on an equal-axis plot
+        else:
+            D_zeta.save('circle_plot.eps')
 
     # Plot F, the fundamental domain
     if plot_F:
         D_zeta = F_plot(delta, q, colors=circle_colors)
-        D_zeta += plot_points(Points, colors=point_colors)
+        D_zeta += plot_points(Points, colors=point_colors, 
+                     mark_size=point_size)
         D_zeta += plot_lines(Lines, colors=line_colors, thickness=2)
-        D_zeta.show(axes = True, title = '$F$, the Fundamental Domain')
+        if save_plots==False:
+            D_zeta.show(axes = True, title = '$F$, the Fundamental Domain')
+        else:
+            D_zeta.save('Fundamental_domain.eps')
     
     # Build the prime function, but make sure it doesn't take too long
     signal.signal(signal.SIGALRM, handler)
@@ -214,9 +225,12 @@ def forward_problem_on_Points_and_Lines(
     # Build the slitmap piece by piece for diagnostic purposes. This now also
     # plots the image of the desired points.
     if slitmap_full: 
-        build_slitmap_detailed(omega, delta, q, Points=Points, Lines=Lines,
+        build_slitmap_detailed(
+                omega, delta, q, Points=Points, Lines=Lines,
                 circle_colors=circle_colors, point_colors=point_colors,
-                line_colors=line_colors)
+                line_colors=line_colors, point_size=point_size,
+                save_plots=save_plots
+                )
 
     return None
 

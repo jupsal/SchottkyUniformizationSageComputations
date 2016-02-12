@@ -172,7 +172,7 @@ def branch_point_plot(b_pts):
     return branch_plot
 
 def plot_points(
-    Points, colors=[], mark='x', mark_size=50
+    Points, colors=[], mark=[], mark_size=50
     ):
     #
     # This module plots points in a certain color
@@ -190,8 +190,12 @@ def plot_points(
     #
     if len(colors)==0:
         colors = [ (0.6*random(), random(), random()) for k in xrange(len(Points)) ]
-    plot_data = sum( [ point( p, marker=mark, size=50, rgbcolor=colors[itnum] )
-        for itnum, p in enumerate(Points) ] )
+
+    if len(mark)==0:
+        mark = ['x','o','v','^','8','s','p','*','h','H','D']
+
+    plot_data = sum( [ point( p, marker=mark[itnum%len(mark)], size=mark_size, 
+        rgbcolor=colors[itnum] ) for itnum, p in enumerate(Points) ] )
     
     return plot_data
 

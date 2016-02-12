@@ -18,8 +18,9 @@ slitmap_tests = False
 slitmap_full = True
 slitmap_direct = False
 prec = 'double' # inf precision takes just a little bit longer for example 2
-group_example_number = 1 #choose from the examples below.
-line_example_number = 0
+group_example_number = 2 #choose from the examples below.
+line_example_number = 1
+save_plots = True # Save plots or not?
 
 def main():
     delta, q = define_group_data(group_example_number)
@@ -34,7 +35,8 @@ def main():
         delta, q, Points, Lines, plot_circles=True, plot_F=plot_F,
         slitmap_full=slitmap_full, slitmap_direct=slitmap_direct, prec=prec, 
         product_threshold=3, max_time=200, 
-        prime_function_tests=prime_function_tests, slitmap_tests=slitmap_tests
+        prime_function_tests=prime_function_tests, slitmap_tests=slitmap_tests,
+        save_plots=save_plots
         )
 
     return None
@@ -66,7 +68,12 @@ def place_lines_and_points(example_num):
 
     if example_num == 1:
         sqrt2 = 2**(-.5) 
-        POINT = [I, -I, 1, -1]
+        #POINT = [I, -I, 1, -1] # Can't do these, these are poles of the slitmap!
+        POINT = [ exp(I*(pi/2-0.1)), exp(I*(-pi/2-0.1)), exp(I*(2*pi-0.1)),
+                exp(I*(pi-0.1)) ] 
+        POINT += [ exp(I*(pi/2+0.1)), exp(I*(-pi/2+0.1)), exp(I*(2*pi+0.1)),
+                exp(I*(pi+0.1)) ] 
+        POINT += [0]
         LINE = [
                 define_line(-sqrt2 - I*sqrt2, sqrt2 + I*sqrt2),
                     # this line goes all the way across the circle

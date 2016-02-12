@@ -14,7 +14,7 @@ def build_slitmap(omega):
 
 def build_slitmap_detailed(
         omega, delta, q, Points=[], Lines=[], point_colors=[], circle_colors=[],
-        line_colors=[], field=CDF
+        line_colors=[], field=CDF, point_size=50, save_plots=False
         ):
     #
     # This module builds the maps which, when composed, give the slitmap. Each
@@ -35,6 +35,7 @@ def build_slitmap_detailed(
     #                           uniform
     #   field = which field do we want to work over? Must be CC or CDF for
     #           plotting lines
+    #   point_size = marker size for point_plot
     # 
     # output:
     #   zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0, zeddata 
@@ -86,7 +87,8 @@ def build_slitmap_detailed(
                                  xrange(len(Points)) ]
 
         zeta1datapoints = [ field(zeta1(z=p)) for p in Points ]
-        zeta1plot += plot_points(zeta1datapoints, point_colors)
+        zeta1plot += plot_points(zeta1datapoints, point_colors,
+                            mark_size=point_size)
 
     if len(Lines)>0:
         # Check to see if we have colors passed in, if not create them
@@ -99,7 +101,9 @@ def build_slitmap_detailed(
         # Maybe this can be optimzed
         zeta1plot += plot_lines(zeta1datalines, line_colors, thickness=2)
 
-    zeta1plot.show(title='$\zeta_1$ plot')
+    if save_plots==False:
+        zeta1plot.show(title='$\zeta_1$ plot')
+    # We usually don't want to save this one.
 
     #zeta1plot = plot_lines(zeta1datalines, line_colors)
     #zeta1plot.show(title='WTF')
@@ -109,13 +113,15 @@ def build_slitmap_detailed(
         analyze_plot = line(zeta1data, rgbcolor=circle_colors[itnum],
                         legend_label='C_'+str(itnum+1))
         if len(Points)>0:
-            analyze_plot += plot_points(zeta1datapoints, point_colors)
+            analyze_plot += plot_points(zeta1datapoints, point_colors,
+                                 mark_size=point_size)
         if len(Lines)>0:
             analyze_plot += plot_lines(zeta1datalines, line_colors,
                     thickness=2)
     
-        analyze_plot.show(title='Image of C_'+str(itnum+1)+' under $\zeta_1$')
-        # Would like all graphics, but this one in particular, to be EPS format.
+        if save_plots==False:
+            analyze_plot.show(title='Image of C_'+str(itnum+1)+' under $\zeta_1$')
+        # We usually don't want to save this one.
     
     
     # Now do it for zeta2
@@ -138,14 +144,17 @@ def build_slitmap_detailed(
     # If 'points' is given as input, then plot them as well.
     if len(Points)>0:
         zeta2datapoints = [ field(zeta2(z=p)) for p in zeta1datapoints ]
-        zeta2plot += plot_points(zeta2datapoints, point_colors)
+        zeta2plot += plot_points(zeta2datapoints, point_colors,
+                            mark_size=point_size)
 
     if len(Lines)>0:
         zeta2datalines = [ map(field, map(zeta2,L)) for L in zeta1datalines ]
         zeta2plot += plot_lines(zeta2datalines, line_colors, thickness=2)
 
-    zeta2plot.show(title='$\zeta_2$ plot', aspect_ratio = 1)
-    
+    if save_plots==False:
+        zeta2plot.show(title='$\zeta_2$ plot', aspect_ratio = 1)
+    # Don't save this one, we usually don't want it.
+
     zed = lambda z: 0.5*(1/z + z)
     # Now do it for zed (the last eqn in (5.18))
     zeddataC0 = [ field(zed(z=zeta2data)) for zeta2data in zeta2dataC0 ]
@@ -158,11 +167,15 @@ def build_slitmap_detailed(
     zedplot = line(zeddataC0, rgbcolor=(1,0,0), legend_label='C_0',
                     linestyle='--')
     # Get the axis range for plotting below with lines and points
-    ax_range = zedplot.get_axes_range()
+    ax_rangeC0 = zedplot.get_axes_range()
+
+    zedplot += plot_lines( zeddataCj, colors=circle_colors, 
+                            group_circles=True )
 
     if len(Points)>0:
         zeddatapoints = [ field(zed(z=p)) for p in zeta2datapoints ]
-        zedplot += plot_points(zeddatapoints, point_colors)
+        zedplot += plot_points(zeddatapoints, point_colors, 
+                            mark_size=point_size)
         #zedplot += sum( [ point( p, marker='x', size=50,
         #    rgbcolor=point_colors[iternum] ) for iternum, p
         #    in enumerate(zeddatapoints) ] )
@@ -171,29 +184,34 @@ def build_slitmap_detailed(
         zeddatalines = [ map(field,map(zed, L)) for L in zeta2datalines ]
         zedplot += plot_lines(zeddatalines, line_colors, thickness=2)
 
-    zedplot.show(title='zedplot C_0')
+    if save_plots==False:
+        zedplot.show(title='zedplot')
+    else:
+        zedplot.save('zedplot.eps')
 
-    zedplot += plot_lines( zeddataCj, colors=circle_colors, 
-                            group_circles=True )
-    #zedplot += sum( [ line( zeddata, rgbcolor=circle_colors[itnum],
-    #    legend_label='C_'+str(itnum+1) ) for itnum, zeddata in
-    #    enumerate(zeddataCj) ] )
+    # also plot the zedplot C_0 near C_0 in case the lines do interesting
+    # things near there. Use the data in ax_range_C0
+    zedplot.set_axes_range( ax_rangeC0['xmin'], ax_rangeC0['xmax'], 
+            ax_rangeC0['ymin'], ax_rangeC0['ymax'] )
+    if save_plots==False:
+        zedplot.show(title='zedplot near C_0')
+    else:
+        zedplot.save('zedplot_C0.eps')
 
-    zedplot.show(title='zedplot')
+    # also plot the zedplot C_j near C_j in case the lines do interesting
+    # things near there.
+    # Get the axes range for Cj
+    for j in xrange(genus):
+        Cplot = line(zeddataCj[j])
+        ax_rangeC = Cplot.get_axes_range()
+        zedplot.set_axes_range( ax_rangeC['xmin'], ax_rangeC['xmax'], 
+                ax_rangeC['ymin'], ax_rangeC['ymax'] )
+        if save_plots==False:
+            zedplot.show(title='zedplot near C_'+str(j+1))
+        else:
+            zedplot.save('zed_C_'+str(j+1)+'.eps')
 
-    # But also plot the zedplot on [-1,1]^2, near C_0 in case the other lines
-    # are far away
-    zedplot.set_axes_range(-1,1,-1,1)
-    zedplot.show(title='zedplot on [-1,1]^2')
-    
-    # But also print the zedplot C_0 near C_0 in case the lines do interesting
-    # things near there. Use the data in ax_range
-    zedplot.set_axes_range( ax_range['xmin'], ax_range['xmax'], 
-            ax_range['ymin'], ax_range['ymax'] )
-    zedplot.show(title='zedplot near C_0')
 
-    #completely_different_Plot #### _!!! Can I use plot_lines on zedplot too?
-        # FOR SURE I CAN
 
     return zeta1dataC0, zeta1dataCj, zeta2dataC0, zeta2dataCj, zeddataC0,\
             zeddataCj

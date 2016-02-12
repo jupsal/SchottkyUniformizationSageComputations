@@ -68,7 +68,9 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
                         "entered for 'prec'")
 
     # Plot the branch points if you want, not really necessary here.
-    if plot_branch_pts: branch_point_plot(branch_pts)
+    if plot_branch_pts:
+        branch_point_plot(branch_pts) ## This can and should be fixed to just
+                                      ## use the plot_points function
 
     # Define the Cj algebraically
     [delta,q] = define_group_data(genus) # We have delta[0] = delta_1, delta[1]
