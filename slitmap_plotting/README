@@ -1,6 +1,6 @@
 This folder contains a bunch of results from plotting lines and points under the
 slitmap for various configurations for presenting. The folder names are as
 follows (all references are to examples in forward_uniformization_examining):
-LE# = line_example_number
 GE# = group_example_number
+LE# = line_example_number
 PT# = product_threshold value
