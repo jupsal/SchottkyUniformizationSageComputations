@@ -18,8 +18,8 @@ slitmap_tests = False
 slitmap_full = True
 slitmap_direct = False
 prec = 'double' # inf precision takes just a little bit longer for example 2
-group_example_number = 2 #choose from the examples below.
-line_example_number = 1
+group_example_number = 1 #choose from the examples below.
+line_example_number = 2
 save_plots = True # Save plots or not?
 
 def main():
@@ -82,7 +82,9 @@ def place_lines_and_points(example_num):
                                                   # circle
                 ]          
     if example_num == 2:
-        POINT = [-2, 2]
+        POINT = [-3, 2-0.5*I, 0, 3*I]
+        #POINT = [2] #Gives a divide by zero error? for product_threshold=2 so I
+        #imagine it does it for others?
         LINE =  [
                 define_line(-2 + 1.2*I, 2+1.2*I), # this line is outside of the
                                                   # circle
@@ -96,7 +98,7 @@ def place_lines_and_points(example_num):
     return POINT, LINE
 
 
-def define_line(x0, x1, field=CDF):
+def define_line(x0, x1, field=CDF, mesh=1000):
     # 
     # Defines a line from x0 to x1 as a collection of Points.
     #
@@ -104,6 +106,7 @@ def define_line(x0, x1, field=CDF):
     #   x0 = starting point
     #   x1 = ending point
     #   field = underlying field. CDF by default but CC is also allowed.
+    #   mesh = how coarse?, use np.linspace(0,1,mesh)
     #
     # output:
     #   line = collection of Points
@@ -113,7 +116,7 @@ def define_line(x0, x1, field=CDF):
                 "with plotting these lines. Proceed with caution.",
                 RuntimeWarning)
 
-    line = [ field(x0 + t*(x1-x0)) for t in np.linspace(0,1,100) ]
+    line = [ field(x0 + t*(x1-x0)) for t in np.linspace(0,1,mesh) ]
     return line
 
 
