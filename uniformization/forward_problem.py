@@ -114,7 +114,7 @@ plot_branch_pts=False, prec='double', product_threshold=5, max_time=200):
     return branch_pts
 
 def forward_problem_on_Points_and_Lines(
-        delta, q, Points, Lines, plot_circles=True,
+        delta, q, Points, Lines, plot_circles=True, plot_F=False,
         slitmap_full=True, slitmap_direct=False, prec='double', 
         product_threshold=5, max_time=200, prime_function_tests=False, 
         slitmap_tests=False
@@ -133,6 +133,7 @@ def forward_problem_on_Points_and_Lines(
     #   Lines = lines to plot in the domain, list
     #   plot_circles = plot the circles from the group data and the
     #       points and lines in the fundamental domain together.
+    #   plot_F = plot the fundamental domain. Lines are filled in as well.
     #   slitmap_full = build the full slitmap, from zeta1, zeta2, z
     #   slitmap_direct = build the slitmap all in one step. Minimum output.
     #   prec = double or infinite precision of the group data?
@@ -181,6 +182,13 @@ def forward_problem_on_Points_and_Lines(
         D_zeta += plot_lines(Lines, colors=line_colors, thickness=2)
         D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1) 
         # show and put on an equal-axis plot
+
+    # Plot F, the fundamental domain
+    if plot_F:
+        D_zeta = F_plot(delta, q, colors=circle_colors)
+        D_zeta += plot_points(Points, colors=point_colors)
+        D_zeta += plot_lines(Lines, colors=line_colors, thickness=2)
+        D_zeta.show(axes = True, title = '$F$, the Fundamental Domain')
     
     # Build the prime function, but make sure it doesn't take too long
     signal.signal(signal.SIGALRM, handler)

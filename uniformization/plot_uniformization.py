@@ -21,15 +21,13 @@ def circle_plots(delta, q, colors=[], field=CDF):
     #       D_zeta.show(axes=True, title='$D_{\zeta}$', aspect_ratio=1)
     #
     
-    # Define our parametric plotting variable
-    #t = var('t')
-    #assume(t,'real')
     genus = len(q)
     
     # Define the C0, Cj
     C0 = lambda t: exp(I*t)
-    Cj = [ lambda t: delta[j] + q[j]*exp(I*t) for j in xrange(genus) ]
-    
+    Cj = [ lambda t, j=j: delta[j] + q[j]*exp(I*t) for j in xrange(genus) ]
+    # use lambda t, j=j so that j is fixed for each element in the list Cj
+
     # Colors for plotting, if not already passed.
     if len(colors)==0:
         colors = [(0.6*random(),random(),random()) for k in range(genus)]
@@ -37,8 +35,6 @@ def circle_plots(delta, q, colors=[], field=CDF):
     
     # Plot the circles, identifying edges with like colors.
     ## First plot C_0
-    #D_zeta = line( [CC(C0(t=v)) for v in srange(0,2*pi+0.2,0.1)], linestyle='--',
-    #rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
     D_zeta = line( [field(C0(v)) for v in srange(0,2*pi+0.2,0.1)], 
             linestyle='--', rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
 
@@ -50,14 +46,10 @@ def circle_plots(delta, q, colors=[], field=CDF):
     D_zeta += plot_lines( CjData, colors=colors, thickness=3, 
                             group_circles=True )
     
-    #D_zeta += sum( [line( [CC(Cj(j)(t=v)) for v in srange(0,2*pi+0.2,0.1)],
-    #rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) ) for j in
-    #range(genus)] )
-
     return D_zeta
 	
 
-def F_plot(delta, q, colors=[]):
+def F_plot(delta, q, colors=[], field=CDF):
     #
     # This module  plots the fundamential region, F, including filling and Cjp
     #
@@ -65,21 +57,27 @@ def F_plot(delta, q, colors=[]):
     #   delta = list of centers of circles
     #   q = radius of circles
     #   colors = list of len genus of RGBcolors for uniform plotting
+    #   field = underlying field, CC or CDF
     #
     # output:
     #   D_zeta = plot data
+    #
 
     # Define our parametric plotting variable
-    t = var('t')
-    assume(t,'real')
+    #t = var('t')
+    #assume(t,'real')
     genus = len(q)
     x,y = var('x,y', domain='real')
     zeta = x+I*y # For the fill plot.
 
     # Define the C0, Cj, Cjp
-    C0 = exp(I*t)
-    Cj = [ delta[j] + q[j]*exp(I*t) for j in range(genus) ]
-    Cjp = [ 1/circle.conjugate() for circle in Cj ]
+    C0 = lambda t: exp(I*t)
+    Cj = [ lambda t, j=j: delta[j] + q[j]*exp(I*t) for j in xrange(genus) ]
+    #Cj = [ delta[j] + q[j]*exp(I*t) for j in range(genus) ]
+    #Cjp = [ 1/circle.conjugate() for circle in Cj ]
+
+    Cjp = [ lambda t, j=j: (conjugate(delta[j]) + q[j]*exp(-I*t))**(-1.) 
+                for j in xrange(genus) ]
     
     # Define circles for filling regions D_zeta and D_zeta'
     C0_fill = norm(zeta)-1 # norm(zeta) = x^2+y^2, sage syntax
@@ -96,29 +94,55 @@ def F_plot(delta, q, colors=[]):
 	
     
     # Get the right viewing window. Calculate the maximum on the real axis
-    xplot_range = [max( [ abs(circle.substitute(t=0)) for circle in Cjp ] )]
-    xplot_range += [max( [ abs(circle.substitute(t=pi)) for circle in Cjp ]
+   # xplot_range = [max( [ abs(circle.substitute(t=0)) for circle in Cjp ] )]
+   # xplot_range += [max( [ abs(circle.substitute(t=pi)) for circle in Cjp ]
+   #     )]
+   # xplot_range = max( xplot_range+[1] ) # Add 1 to make sure we at least
+   #                                      # get the unit circle
+   # yplot_range = [max( [ norm(CDF(circle.substitute(t=pi/2))) for circle in
+   #     Cjp ] )]
+   # yplot_range += [max( [ norm(CDF(circle.substitute(t=-pi/2))) for circle
+   #     in Cjp ] )]
+   # yplot_range = max( yplot_range+[1] ) # Add 1 to make sure we at least get
+   #                                     # the unit circle
+
+    xplot_range = [max( [ abs(circle(0)) for circle in Cjp ] )]
+    xplot_range += [max( [ abs(circle(pi)) for circle in Cjp ]
         )]
     xplot_range = max( xplot_range+[1] ) # Add 1 to make sure we at least
                                          # get the unit circle
-    yplot_range = [max( [ norm(CDF(circle.substitute(t=pi/2))) for circle in
+    yplot_range = [max( [ norm(field(circle(pi/2))) for circle in
         Cjp ] )]
-    yplot_range += [max( [ norm(CDF(circle.substitute(t=-pi/2))) for circle
+    yplot_range += [max( [ norm(field(circle(-pi/2))) for circle
         in Cjp ] )]
-    yplot_range = max( yplot_range+[1] ) # Add 1 to make sure we at least get
-                                        # the unit circle
+    yplot_range = max( yplot_range+[1] ) # Add 1 to make sure we at least 
+                                         # get the unit circle
     
     # Plot the circles, identifying edges with like colors.
     ## First plot C_0
-    D_zeta = line( [CC(C0(t=v)) for v in srange(0,2*pi+0.2,0.1)], linestyle='--',
-        rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
+    #D_zeta = line( [CC(C0(t=v)) for v in srange(0,2*pi+0.2,0.1)], linestyle='--',
+    #    rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
+    D_zeta = line( [field(C0(v)) for v in srange(0,2*pi+0.2,0.1)], 
+            linestyle='--', rgbcolor=(1,0,0), thickness=3, legend_label='C_0' )
     ## Plot the C_j
-    D_zeta += sum( [line( [CC(Cj[j](t=v)) for v in srange(0,2*pi+0.2,0.1)],
-        rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) )
-            for j in range(genus)] )
+    #D_zeta += sum( [line( [CC(Cj[j](t=v)) for v in srange(0,2*pi+0.2,0.1)],
+    #    rgbcolor=colors[j], thickness=3, legend_label='C_'+str(j+1) )
+    #        for j in range(genus)] )
+    
+    CjData = [ map(field, map(circle, srange(0,2*pi+0.2,0.1)))
+                for circle in Cj ]
+    D_zeta += plot_lines( CjData, colors=colors, thickness=3,
+                            group_circles=True )
+
     ## Plot the C_j'
-    D_zeta += sum( [line( [CC(Cjp[j](t=v)) for v in srange(0,2*pi+0.2,0.1)],
-        rgbcolor=colors[j], thickness=3 ) for j in range(genus)] )
+    CjpData = [ map(field, map(circle, srange(0,2*pi+0.2,0.1))) 
+                for circle in Cjp ]
+    D_zeta += plot_lines( CjpData, colors=colors, thickness=3,
+                            group_circles=True )
+
+    ## Plot the C_j'
+    #D_zeta += sum( [line( [CC(Cjp[j](t=v)) for v in srange(0,2*pi+0.2,0.1)],
+    #    rgbcolor=colors[j], thickness=3 ) for j in range(genus)] )
     ## Fill the two regions, D_\zeta and D_zeta'
     D_zeta += region_plot( [real_part(C0_fill)<0]+[real_part(Cj_fill[k])>0
             for k in range(0,genus)], (x,-xplot_range,xplot_range),

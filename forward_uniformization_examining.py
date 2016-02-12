@@ -12,30 +12,29 @@ from sage.all import *
 #import forward_problem
 
 plot_circles = True
-plot_F = False
+plot_F = True
 prime_function_tests = False
 slitmap_tests = False
 slitmap_full = True
 slitmap_direct = False
 prec = 'double' # inf precision takes just a little bit longer for example 2
-example_number = 1 #choose from the examples below.
+group_example_number = 1 #choose from the examples below.
+line_example_number = 0
 
 def main():
-    delta, q = define_group_data(example_number)
+    delta, q = define_group_data(group_example_number)
 
-    Points = [I/2, -I/2] # Use capital to avoid the weirdly used Points==point
+
+    Points, Lines = place_lines_and_points(line_example_number)
+        # Use capitals to avoid the weirdly used Points==point
                             # in sage
-
-    Lines = [
-            define_line(-1./4+1./4*I, 1./4+1./4*I), 
-            define_line(-1./4-1./4*I, 1./4+1./4*I)
-            ]                 # use capital L to be consistent with Points
+        # use capital L to be consistent with Points
     
     forward_problem_on_Points_and_Lines(
-        delta, q, Points, Lines, plot_circles=True, slitmap_full=slitmap_full,
-        slitmap_direct=slitmap_direct, prec=prec, product_threshold=3,
-        max_time=200, prime_function_tests=prime_function_tests,
-        slitmap_tests=slitmap_tests
+        delta, q, Points, Lines, plot_circles=True, plot_F=plot_F,
+        slitmap_full=slitmap_full, slitmap_direct=slitmap_direct, prec=prec, 
+        product_threshold=3, max_time=200, 
+        prime_function_tests=prime_function_tests, slitmap_tests=slitmap_tests
         )
 
     return None
@@ -52,6 +51,43 @@ def define_group_data(example_num):
     
     if example_num == 2: #genus 2,
         return [-1./2,1./2], [1./4,1./4] # delta, q
+
+
+def place_lines_and_points(example_num):
+    if example_num == 0:
+
+       POINT = [I/3, -I/3]
+       LINE = [
+                define_line(-1./4+1./2*I, 1./4+1./2*I), 
+                define_line(-1./4-1./4*I, 1./4+1./2*I),
+                define_line(-1./4-1./4*I, -1./4+1./2*I)
+                ]          
+
+
+    if example_num == 1:
+        sqrt2 = 2**(-.5) 
+        POINT = [I, -I, 1, -1]
+        LINE = [
+                define_line(-sqrt2 - I*sqrt2, sqrt2 + I*sqrt2),
+                    # this line goes all the way across the circle
+                define_line(-sqrt2 + I*sqrt2, sqrt2 - I*sqrt2)
+                    # this line goes all the way across the circle
+                                                  # circle
+                ]          
+    if example_num == 2:
+        POINT = [-2, 2]
+        LINE =  [
+                define_line(-2 + 1.2*I, 2+1.2*I), # this line is outside of the
+                                                  # circle
+                define_line(-3 - 1.2*I, 3-1.2*I), # this line is outside of the
+                                                  # circle
+                define_line(-1.2 - 2*I, -1.2+2*I), # this line is outside of the
+                                                  # circle
+                define_line(1.2 - 3*I, 1.2+3*I), # this line is outside of the
+                ]
+        
+    return POINT, LINE
+
 
 def define_line(x0, x1, field=CDF):
     # 
